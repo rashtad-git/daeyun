@@ -1,18 +1,17 @@
 #pragma once
 
-class GameManager
-{
-public:
-    GameManager();
-    ~GameManager();
+class GameManager {
+ public:
+  GameManager();
+  ~GameManager();
 
-public:
-    void run();
+ public:
+  void run();
 
-private:
-    bool onGameLoop();
+ private:
+  bool onGameLoop();
 
-private:
-    struct PrivateData;
-    PrivateData *This;
+ private:
+  struct PrivateData;
+  PrivateData* This;
 };

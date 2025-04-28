@@ -1,15 +1,14 @@
 #pragma once
 
-class InputManager
-{
-public:
-    InputManager();
-    ~InputManager();
+class InputManager {
+ public:
+  InputManager();
+  ~InputManager();
 
-public:
-    void Update(double deltaTime);
+ public:
+  void Update(double deltaTime);
 
-private:
-    struct PrivateData;
-    PrivateData *This;
+ private:
+  struct PrivateData;
+  PrivateData* This;
 };

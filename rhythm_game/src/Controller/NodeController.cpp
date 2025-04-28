@@ -2,352 +2,292 @@
 
 #include <list>
 
-#include "./Node/Node.h"
 #include "../System/DataManager.h"
 #include "../Utils/Math.h"
+#include "./Node/Node.h"
 
 NodeController::NodeController()
-	: prevSigIndex(0), prevTickIndex(0), movedFrame(false), spawnCount(0)
-{
+    : prevSigIndex(0), prevTickIndex(0), movedFrame(false), spawnCount(0) {}
+
+NodeController::~NodeController() {
+  for (auto node : nodePool) {
+    delete node;
+  }
 }
 
-NodeController::~NodeController()
-{
-	for (auto node : nodePool)
-	{
-		delete node;
-	}
+void NodeController::OnInit() {
+  auto& game = DataManager::GetInstance().game;
+
+  prevSigIndex = 0;
+  spawnCount = 0;
+
+  InitJudge();
 }
 
-void NodeController::OnInit()
-{
-	auto& game = DataManager::GetInstance().game;
+void NodeController::OnUpdate(double deltaTime) {
+  auto& game = DataManager::GetInstance().game;
 
-	prevSigIndex = 0;
-	spawnCount = 0;
+  // ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+  OnSpawn(deltaTime);
 
-	InitJudge();
+  OnMove(deltaTime);
+  OnJudge(deltaTime);
+
+  // ï¿½ï¿½å°¡ hit ï¿½Ç¾ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ poolï¿½ï¿½ ï¿½Çµï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
+  OnCleanup(deltaTime);
+
+  prevSigIndex = game.TimeSigIndex;
 }
 
-void NodeController::OnUpdate(double deltaTime)
-{
-	auto& game = DataManager::GetInstance().game;
+void NodeController::OnSpawn(double deltaTime) {
+  auto& game = DataManager::GetInstance().game;
 
-	// »õ·Î¿î ³ëµå »ý¼º
-	OnSpawn(deltaTime);
+  if (game.TimeSigIndex == prevSigIndex)
+    return;
 
-	OnMove(deltaTime);
-	OnJudge(deltaTime);
+  int sigIndex = (game.TimeSigIndex + Config::GAME_LINE_HEIGHT - 2) %
+                 game.TimeSig.GetMaxIndex();
 
-	// ³ëµå°¡ hit µÇ¾úÀ» ¶§ ÀÌÆåÆ®¿Í pool·Î µÇµ¹¸®´Â Ã³¸®
-	OnCleanup(deltaTime);
+  int count = 1;
+  switch (game.Difficulty) {
+      // Beginnerï¿½ï¿½ Ã¹ï¿½Ú¸ï¿½ 1ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+    case Difficulty::Beginner:
+      if (sigIndex == 0)
+        break;
+      return;
 
-	prevSigIndex = game.TimeSigIndex;
+      // easyï¿½ï¿½ Ã¹ï¿½Ú¿ï¿½ ï¿½Ö´ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    case Difficulty::Easy:
+      if (sigIndex == 0) {
+        count = Math::GetRandom(0, 1) + 1;
+        break;
+      } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        if (Math::GetRandom(0, game.TimeSig.Bottom) == 0)
+          break;
+      }
+      return;
+      // easy ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½óµµ·ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½, ï¿½Ú¿ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+    case Difficulty::Normal:
+      count = Math::GetRandom(0, 1) + 1;
+      if (sigIndex == 0) {
+        break;
+      } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        if (Math::GetRandom(0, 1) == 0)
+          break;
+      }
+      return;
+
+      // ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½Ö´ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½, 8ï¿½ï¿½ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½
+    case Difficulty::Hard:
+      if (sigIndex == 0) {
+        count = Math::GetRandom(0, 1) + 1;
+        break;
+      } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        count = Math::GetRandom(0, 1) + 1;
+        if (Math::GetRandom(0, 1) == 0)
+          break;
+      } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
+        if (Math::GetRandom(0, game.TimeSig.Bottom) == 0)
+          break;
+      }
+      return;
+
+      // Ã¹ï¿½Ú¿ï¿½ ï¿½Ö´ï¿½ 3ï¿½ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½,
+    case Difficulty::VeryHard:
+      if (sigIndex == 0) {
+        count = Math::GetRandom(0, 2) + 1;
+        break;
+      } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
+        count = Math::GetRandom(0, 1) + 1;
+        if (Math::GetRandom(0, 3) != 0)
+          break;
+      }
+      return;
+
+      // 16ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½
+    case Difficulty::Expert:
+      if (sigIndex == 0) {
+        count = Math::GetRandom(0, 2) + 1;
+        break;
+      } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        count = Math::GetRandom(0, 1) + 1;
+        break;
+      } else if (sigIndex % (game.TimeSig.Bottom / 4) == 0) {
+        if (Math::GetRandom(0, 1) == 0)
+          break;
+      }
+      return;
+
+    case Difficulty::Master:
+      if (sigIndex % game.TimeSig.Bottom == 0) {
+        count = 2;
+      }
+      break;
+  }
+
+  std::set<int> lines(prevLines);
+  prevLines.clear();
+  for (int i = 0; i < count; i++) {
+    int line = Math::GetRandom(0, 3, lines);
+    GenNode(line);
+
+    lines.insert(line);
+    prevLines.insert(line);
+  }
 }
 
-void NodeController::OnSpawn(double deltaTime)
-{
-	auto& game = DataManager::GetInstance().game;
+void NodeController::OnMove(double deltaTime) {
+  auto& game = DataManager::GetInstance().game;
 
-	if (game.TimeSigIndex == prevSigIndex)
-		return;
+  double tick = game.TimeSig.GetTick() / game.NoteSpeed;
+  double frame = game.TimeSigFrame;
+  int tickIndex = 0;
+  while (frame > tick) {
+    frame -= tick;
+    tickIndex++;
+  }
 
-	int sigIndex = (game.TimeSigIndex + Config::GAME_LINE_HEIGHT - 2) % game.TimeSig.GetMaxIndex();
+  if (game.TimeSigIndex == prevSigIndex && prevTickIndex == tickIndex)
+    return;
 
-	int count = 1;
-	switch (game.Difficulty)
-	{
-		// Beginner´Â Ã¹¹Ú¸¸ 1°³ÀÇ ³ëÆ® »ý¼º
-	case Difficulty::Beginner:
-		if (sigIndex == 0)
-			break;
-		return;
+  prevTickIndex = tickIndex;
 
-		// easy´Â Ã¹¹Ú¿¡ ÃÖ´ë 2°³ÀÇ ³ëÆ®°¡ »ý¼ºµÇ°í ¹Ú¸¶´Ù °¡²û ³ëÆ®°¡ »ý¼º
-	case Difficulty::Easy:
-		if (sigIndex == 0)
-		{
-			count = Math::GetRandom(0, 1) + 1;
-			break;
-		}
-		else if (sigIndex % game.TimeSig.Bottom == 0)
-		{
-			if (Math::GetRandom(0, game.TimeSig.Bottom) == 0)
-				break;
-		}
-		return;
-		// easy ¿Í °°À¸³ª ´õ ¸¹Àº ºóµµ·Î ³ëÆ® »ý¼º, ¹Ú¿¡µµ 2°³ÀÇ ³ëÆ® µîÀå
-	case Difficulty::Normal:
-		count = Math::GetRandom(0, 1) + 1;
-		if (sigIndex == 0)
-		{
-			break;
-		}
-		else if (sigIndex % game.TimeSig.Bottom == 0)
-		{
-			if (Math::GetRandom(0, 1) == 0)
-				break;
-		}
-		return;
+  for (auto node : game.StageNodes) {
+    if (node->IsActive() == false)
+      continue;
 
-		// ¸Å ¹Ú¿¡ ÃÖ´ë 2°³ÀÇ ³ëÆ® µîÀå, 8ºÐÀ½Ç¥ µîÀå
-	case Difficulty::Hard:
-		if (sigIndex == 0)
-		{
-			count = Math::GetRandom(0, 1) + 1;
-			break;
-		}
-		else if (sigIndex % game.TimeSig.Bottom == 0)
-		{
-			count = Math::GetRandom(0, 1) + 1;
-			if (Math::GetRandom(0, 1) == 0)
-				break;
-		}
-		else if (sigIndex % (game.TimeSig.Bottom / 2) == 0)
-		{
-			if (Math::GetRandom(0, game.TimeSig.Bottom) == 0)
-				break;
-		}
-		return;
+    if (node->IsHit())
+      continue;
 
-		// Ã¹¹Ú¿¡ ÃÖ´ë 3°³ ³ëÆ® µîÀå,
-	case Difficulty::VeryHard:
-		if (sigIndex == 0)
-		{
-			count = Math::GetRandom(0, 2) + 1;
-			break;
-		}
-		else if (sigIndex % (game.TimeSig.Bottom / 2) == 0)
-		{
-			count = Math::GetRandom(0, 1) + 1;
-			if (Math::GetRandom(0, 3) != 0)
-				break;
-		}
-		return;
-
-		// 16ºÐ À½Ç¥ µîÀå
-	case Difficulty::Expert:
-		if (sigIndex == 0)
-		{
-			count = Math::GetRandom(0, 2) + 1;
-			break;
-		}
-		else if (sigIndex % game.TimeSig.Bottom == 0)
-		{
-			count = Math::GetRandom(0, 1) + 1;
-			break;
-		}
-		else if (sigIndex % (game.TimeSig.Bottom / 4) == 0)
-		{
-			if (Math::GetRandom(0, 1) == 0)
-				break;
-		}
-		return;
-
-	case Difficulty::Master:
-		if (sigIndex % game.TimeSig.Bottom == 0)
-		{
-			count = 2;
-		}
-		break;
-	}
-
-	std::set<int> lines(prevLines);
-	prevLines.clear();
-	for (int i = 0; i < count; i++)
-	{
-		int line = Math::GetRandom(0, 3, lines);
-		GenNode(line);
-
-		lines.insert(line);
-		prevLines.insert(line);
-	}
+    node->Move();
+  }
 }
 
-void NodeController::OnMove(double deltaTime)
-{
-	auto& game = DataManager::GetInstance().game;
+void NodeController::OnJudge(double deltaTime) {
+  auto& game = DataManager::GetInstance().game;
+  auto& user = DataManager::GetInstance().user;
 
-	double tick = game.TimeSig.GetTick() / game.NoteSpeed;
-	double frame = game.TimeSigFrame;
-	int tickIndex = 0;
-	while (frame > tick)
-	{
-		frame -= tick;
-		tickIndex++;
-	}
+  for (int line = 0; line < Config::BUTTON_COUNT; line++) {
+    if (user.input[line].tapped == false)
+      continue;
 
-	if (game.TimeSigIndex == prevSigIndex && prevTickIndex == tickIndex)
-		return;
+    for (auto node : game.StageNodes) {
+      if (node->IsHit() || node->GetLine() != line)
+        continue;
 
-	prevTickIndex = tickIndex;
+      int index = node->GetIndex();
+      if (!JudgeNode(node))
+        continue;
 
-	for (auto node : game.StageNodes)
-	{
-		if (node->IsActive() == false)
-			continue;
+      break;
+    }
+  }
 
-		if (node->IsHit())
-			continue;
-
-		node->Move();
-	}
+  for (Node* node : game.StageNodes) {
+    if (node->GetIndex() > Config::GAME_LINE_HEIGHT) {
+      node->SetActive(false);
+      user.scores[ScoreTypes::Miss]++;
+    }
+  }
 }
 
-void NodeController::OnJudge(double deltaTime)
-{
-	auto& game = DataManager::GetInstance().game;
-	auto& user = DataManager::GetInstance().user;
+void NodeController::OnCleanup(double deltaTime) {
+  auto& game = DataManager::GetInstance().game;
 
-	for (int line = 0; line < Config::BUTTON_COUNT; line++)
-	{
-		if (user.input[line].tapped == false)
-			continue;
+  std::list<Node*> deactivated;
+  for (Node* node : game.StageNodes) {
+    node->OnEffect(deltaTime);
+    if (node->IsActive() == false) {
+      deactivated.push_back(node);
+    }
+  }
 
-		for (auto node : game.StageNodes)
-		{
-			if (node->IsHit() || node->GetLine() != line)
-				continue;
-
-			int index = node->GetIndex();
-			if (!JudgeNode(node))
-				continue;
-
-			break;
-		}
-	}
-
-	for (Node* node : game.StageNodes)
-	{
-		if (node->GetIndex() > Config::GAME_LINE_HEIGHT)
-		{
-			node->SetActive(false);
-			user.scores[ScoreTypes::Miss]++;
-		}
-	}
+  for (Node* node : deactivated) {
+    game.StageNodes.remove(node);
+    nodePool.push_back(node);
+  }
 }
 
-void NodeController::OnCleanup(double deltaTime)
-{
-	auto& game = DataManager::GetInstance().game;
+void NodeController::InitJudge() {
+  auto& game = DataManager::GetInstance().game;
 
-	std::list<Node*> deactivated;
-	for (Node* node : game.StageNodes)
-	{
-		node->OnEffect(deltaTime);
-		if (node->IsActive() == false)
-		{
-			deactivated.push_back(node);
-		}
-	}
+  // Judge
+  int perfectJudge = Config::GAME_LINE_HEIGHT - 1;
+  const double tick = game.TimeSig.GetTick();
 
-	for (Node* node : deactivated)
-	{
-		game.StageNodes.remove(node);
-		nodePool.push_back(node);
-	}
+  judgePerfect = tick / 4;
+  judgeGreat = tick / 2;
+  judgeGood = tick;
+  judgeBad = tick * 2;
+
+  //
+  judgePerfect = 0.022;
+  judgeGreat = 0.045;
+  judgeGood = 0.09;
+  judgeBad = 0.15;
 }
 
-void NodeController::InitJudge()
-{
-	auto& game = DataManager::GetInstance().game;
+void NodeController::GenNode(int line) {
+  auto& game = DataManager::GetInstance().game;
 
-	// Judge
-	int perfectJudge = Config::GAME_LINE_HEIGHT - 1;
-	const double tick = game.TimeSig.GetTick();
+  if (nodePool.size() <= 0) {
+    nodePool.push_back(new Node());
+  }
 
-	judgePerfect = tick / 4;
-	judgeGreat = tick / 2;
-	judgeGood = tick;
-	judgeBad = tick * 2;
+  auto node = nodePool.front();
+  nodePool.pop_front();
 
-	// 
-	judgePerfect = 0.022;
-	judgeGreat = 0.045;
-	judgeGood = 0.09;
-	judgeBad = 0.15;
+  node->Init(line);
+  game.StageNodes.push_back(node);
 }
 
-void NodeController::GenNode(int line)
-{
-	auto& game = DataManager::GetInstance().game;
+bool NodeController::JudgeNode(Node* node) const {
+  auto& game = DataManager::GetInstance().game;
+  auto& user = DataManager::GetInstance().user;
 
-	if (nodePool.size() <= 0)
-	{
-		nodePool.push_back(new Node());
-	}
+  int index = node->GetIndex();
+  //if (index < Config::GAME_LINE_HEIGHT - 3)
+  //	return false;
 
-	auto node = nodePool.front();
-	nodePool.pop_front();
+  // Judge
+  int perfectJudge = Config::GAME_LINE_HEIGHT - 2;
+  int judgeLine = index - perfectJudge;
+  const double tick = game.TimeSig.GetTick();
 
-	node->Init(line);
-	game.StageNodes.push_back(node);
-}
+  double duration = 0;
+  bool isFast = true;
+  if (judgeLine >= 0) {
+    duration = game.TimeSigFrame + judgeLine * tick;
+  } else {
+    duration = (tick - game.TimeSigFrame + std::abs(judgeLine + 1) * tick);
+  }
 
-bool NodeController::JudgeNode(Node* node) const
-{
-	auto& game = DataManager::GetInstance().game;
-	auto& user = DataManager::GetInstance().user;
+  if (duration < judgePerfect) {
+    user.scores[ScoreTypes::Perfect]++;
 
-	int index = node->GetIndex();
-	//if (index < Config::GAME_LINE_HEIGHT - 3)
-	//	return false;
+    // perfectï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä­ ï¿½ï¿½ï¿½ï¿½
+    if (judgeLine < 0)
+      node->Move();
+  } else if (duration < judgeGreat) {
+    user.scores[ScoreTypes::Great]++;
+  } else if (duration < judgeGood) {
+    user.scores[ScoreTypes::Good]++;
+  } else if (duration < judgeBad) {
+    user.scores[ScoreTypes::Bad]++;
+  } else {
+    return false;
+  }
 
-	// Judge
-	int perfectJudge = Config::GAME_LINE_HEIGHT - 1;
-	int judgeLine = index - perfectJudge;
-	const double tick = game.TimeSig.GetTick();
+  if (duration > judgePerfect) {
+    if (judgeLine < 0) {
+      user.fastIndicator.push_back(duration);
+    } else {
+      user.lateIndicator.push_back(duration);
+    }
+  }
 
-	double duration = 0;
-	bool isFast = true;
-	if (judgeLine >= 0)
-	{
-		duration = game.TimeSigFrame + judgeLine * tick;
-	}
-	else
-	{
-		duration = (tick - game.TimeSigFrame + std::abs(judgeLine + 1) * tick);
-	}
+  game.debugJudge += duration;
 
-	if (duration < judgePerfect)
-	{
-		user.scores[ScoreTypes::Perfect]++;
-
-		// perfectÀÏ ¶§ ÇÑÄ­ º¸Á¤
-		if (judgeLine < 0)
-			node->Move();
-	}
-	else if (duration < judgeGreat)
-	{
-		user.scores[ScoreTypes::Great]++;
-	}
-	else if (duration < judgeGood)
-	{
-		user.scores[ScoreTypes::Good]++;
-	}
-	else if (duration < judgeBad)
-	{
-		user.scores[ScoreTypes::Bad]++;
-	}
-	else
-	{
-		return false;
-	}
-
-	if (duration > judgePerfect)
-	{
-		if (judgeLine < 0)
-		{
-			user.fastIndicator.push_back(duration);
-		}
-		else
-		{
-			user.lateIndicator.push_back(duration);
-		}
-	}
-
-	game.debugJudge += duration;
-
-	node->SetIsHit(true);
-	return true;
+  node->SetIsHit(true);
+  return true;
 }

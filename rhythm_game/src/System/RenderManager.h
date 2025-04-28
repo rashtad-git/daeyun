@@ -4,19 +4,18 @@
 
 class IRenderer;
 
-class RenderManager
-{
-public:
-    RenderManager();
-    ~RenderManager();
+class RenderManager {
+ public:
+  RenderManager();
+  ~RenderManager();
 
-public:
-    void Render() const;
+ public:
+  void Render() const;
 
-private:
-    std::stringstream OnRender(IRenderer *renderer) const;
+ private:
+  std::stringstream OnRender(IRenderer* renderer) const;
 
-private:
-    struct PrivateData;
-    PrivateData *This;
+ private:
+  struct PrivateData;
+  PrivateData* This;
 };

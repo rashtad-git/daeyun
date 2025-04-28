@@ -2,17 +2,16 @@
 
 class Node;
 
-class StateManager
-{
-public:
-	StateManager();
-    ~StateManager();
+class StateManager {
+ public:
+  StateManager();
+  ~StateManager();
 
-public:
-	void Init();
-    void Update(double deltaTime);
+ public:
+  void Init();
+  void Update(double deltaTime);
 
-private:
-    struct PrivateData;
-    PrivateData *This;
+ private:
+  struct PrivateData;
+  PrivateData* This;
 };

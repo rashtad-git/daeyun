@@ -1,38 +1,37 @@
 #pragma once
 
-class Node
-{
-public:
-    Node();
+class Node {
+ public:
+  Node();
 
-public:
-    int GetLine() const { return line; }
+ public:
+  int GetLine() const { return line; }
 
-    void SetIsHit(bool isHit) { this->isHit = isHit; }
-    bool IsHit() const { return isHit; }
+  void SetIsHit(bool isHit) { this->isHit = isHit; }
+  bool IsHit() const { return isHit; }
 
-    bool IsActive() const { return isActive; }
-    void SetActive(bool active) { isActive = active; }
+  bool IsActive() const { return isActive; }
+  void SetActive(bool active) { isActive = active; }
 
-    char GetGraphic() const { return graphic; }
+  char GetGraphic() const { return graphic; }
 
-	int GetIndex() const { return index; }
-	void Move() { index++; }
+  int GetIndex() const { return index; }
+  void Move() { index++; }
 
-public:
-    void Init(int line);
-    void OnEffect(double deltaTime);
-    void Clear();
+ public:
+  void Init(int line);
+  void OnEffect(double deltaTime);
+  void Clear();
 
-private:
-	void OnHit(double deltaTime);
+ private:
+  void OnHit(double deltaTime);
 
-private:
-    int line;
-	int index;
-    bool isHit;
-    bool isActive;
+ private:
+  int line;
+  int index;
+  bool isHit;
+  bool isActive;
 
-    double hitFrame;
-    char graphic;
+  double hitFrame;
+  char graphic;
 };

@@ -3,25 +3,16 @@
 #include "../../Game/Config.h"
 #include "../../Utils/Math.h"
 
-TitleScreen::TitleScreen()
-{
-	SetPosition(Point(3, 2));
+TitleScreen::TitleScreen() {
+  SetPosition(Point(3, 2));
 
-	SetSize(Size(20, 20));
+  SetSize(Size(20, 20));
 }
 
-TitleScreen::~TitleScreen()
-{
-}
+TitleScreen::~TitleScreen() {}
 
-void TitleScreen::Init()
-{
-}
+void TitleScreen::Init() {}
 
-void TitleScreen::PreRender()
-{
-}
+void TitleScreen::PreRender() {}
 
-void TitleScreen::PostRender()
-{
-}
+void TitleScreen::PostRender() {}

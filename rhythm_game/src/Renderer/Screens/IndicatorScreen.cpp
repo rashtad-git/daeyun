@@ -1,21 +1,11 @@
 #include "IndicatorScreen.h"
 
-IndicatorScreen::IndicatorScreen()
-{
-}
+IndicatorScreen::IndicatorScreen() {}
 
-IndicatorScreen::~IndicatorScreen()
-{
-}
+IndicatorScreen::~IndicatorScreen() {}
 
-void IndicatorScreen::Init()
-{
-}
+void IndicatorScreen::Init() {}
 
-void IndicatorScreen::PreRender()
-{
-}
+void IndicatorScreen::PreRender() {}
 
-void IndicatorScreen::PostRender()
-{
-}
+void IndicatorScreen::PostRender() {}

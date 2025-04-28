@@ -1,14 +1,9 @@
 #include "ResultRenderer.h"
 
-void ResultRenderer::PreRender()
-{
+void ResultRenderer::PreRender() {}
+
+char ResultRenderer::OnRender(const Point& p) {
+  return ' ';
 }
 
-char ResultRenderer::OnRender(const Point& p)
-{
-    return ' ';
-}
-
-void ResultRenderer::PostRender()
-{
-}
+void ResultRenderer::PostRender() {}

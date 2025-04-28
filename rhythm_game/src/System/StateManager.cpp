@@ -3,42 +3,34 @@
 
 #include "DataManager.h"
 
-#include "../Controller/NodeController.h"
 #include "../Controller/MeterController.h"
+#include "../Controller/NodeController.h"
 
-struct StateManager::PrivateData
-{
-	std::vector<IController*> controllers;
+struct StateManager::PrivateData {
+  std::vector<IController*> controllers;
 };
 
-StateManager::StateManager()
-{
-    This = new PrivateData();
-	This->controllers.push_back(new NodeController());
-	This->controllers.push_back(new MeterController());
+StateManager::StateManager() {
+  This = new PrivateData();
+  This->controllers.push_back(new NodeController());
+  This->controllers.push_back(new MeterController());
 }
 
-StateManager::~StateManager()
-{
-	for (auto& controller : This->controllers)
-	{
-		delete controller;
-	}
-    delete This;
+StateManager::~StateManager() {
+  for (auto& controller : This->controllers) {
+    delete controller;
+  }
+  delete This;
 }
 
-void StateManager::Init()
-{
-	for (auto& controller : This->controllers)
-	{
-		controller->OnInit();
-	}
+void StateManager::Init() {
+  for (auto& controller : This->controllers) {
+    controller->OnInit();
+  }
 }
 
-void StateManager::Update(double deltaTime)
-{
-	for (auto controller : This->controllers)
-	{
-		controller->OnUpdate(deltaTime);
-	}
+void StateManager::Update(double deltaTime) {
+  for (auto controller : This->controllers) {
+    controller->OnUpdate(deltaTime);
+  }
 }

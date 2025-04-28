@@ -2,21 +2,20 @@
 
 #include "IRenderer.h"
 
-class GameRenderer : public IRenderer
-{
-public:
-    virtual void PreRender() override;
-    virtual char OnRender(const Point& p) override;
-    virtual void PostRender() override;
+class GameRenderer : public IRenderer {
+ public:
+  virtual void PreRender() override;
+  virtual char OnRender(const Point& p) override;
+  virtual void PostRender() override;
 
-private:
-	void OnInitGameScreen();
+ private:
+  void OnInitGameScreen();
 
-public:
-    GameRenderer();
-    virtual ~GameRenderer() override;
+ public:
+  GameRenderer();
+  virtual ~GameRenderer() override;
 
-private:
-	struct PrivateData;
-	PrivateData* This;
+ private:
+  struct PrivateData;
+  PrivateData* This;
 };
