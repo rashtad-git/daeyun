@@ -29,6 +29,12 @@ RenderManager::~RenderManager() {
   delete This;
 }
 
+void RenderManager::Init() {
+  This->gameRenderer.Init();
+  This->titleRenderer.Init();
+  This->resultRenderer.Init();
+}
+
 void RenderManager::Render() const {
   auto& data = DataManager::GetInstance();
 
@@ -96,26 +102,35 @@ std::stringstream RenderManager::OnRender(IRenderer* renderer) const {
       buffer << "   " << data.system.UpdateFrame << " UpdateFrame";
     }
 
-    if (y == 4) {
-      buffer << "   " << "Speed " << data.game.NoteSpeed;
-    }
-
     if (y == 5) {
       buffer << "   " << "BPM " << data.game.TimeSig.BPM;
     }
 
     if (y == 6) {
-      buffer << "   " << "Meter " << data.game.TimeSig.Top << "/"
-             << data.game.TimeSig.Bottom;
-    }
-
-    if (y == 8) {
-      int count = 0;
-      for (auto iter : data.user.scores)
-        count += iter.second;
-
-      int judge = count == 0 ? 0 : (int)((data.game.debugJudge / count) * 1000);
-      buffer << "   " << "Judge " << judge << " ms         ";
+      buffer << "   " << "Difficulty ";
+      switch (data.game.Difficulty) {
+        case Difficulty::Beginner:
+          buffer << "Beginner";
+          break;
+        case Difficulty::Easy:
+          buffer << "Easy";
+          break;
+        case Difficulty::Normal:
+          buffer << "Normal";
+          break;
+        case Difficulty::Hard:
+          buffer << "Hard";
+          break;
+        case Difficulty::VeryHard:
+          buffer << "Very Hard";
+          break;
+        case Difficulty::Expert:
+          buffer << "Expert";
+          break;
+        case Difficulty::Master:
+          buffer << "Master";
+          break;
+      }
     }
 
     buffer << std::endl;

@@ -23,9 +23,9 @@ enum class Difficulty {
 };
 
 struct TimeSignature {
-  int BPM = 120;
-  int Top = 4;     // 3, 4, 6, 9, 12
-  int Bottom = 4;  // 4, 8
+  int BPM;
+  int Top;     // 3, 4, 6, 9, 12
+  int Bottom;  // 4, 8
 
   int GetMaxIndex() const { return Top * Bottom; }
   double GetDuration() const { return (60 / (double)BPM) * (double)Top; }
@@ -33,11 +33,11 @@ struct TimeSignature {
 };
 
 struct GameData {
-  GameState GameState = GameState::Game;
+  GameState GameState;
 
   bool IsPlaySound = true;
-  Difficulty Difficulty = Difficulty::Beginner;
-  int NoteSpeed = 2;
+  Difficulty Difficulty;
+  int NoteSpeed;
   TimeSignature TimeSig;
   int TimeSigIndex = 0;  // 0 ~ TimeSig.Top * TimeSig.Bottom
   double TimeSigFrame = 0;
@@ -45,5 +45,8 @@ struct GameData {
   int StageNodeCount;
   std::list<Node*> StageNodes;
 
-  double debugJudge = 0;
+  double Judge_Perfect;
+  double Judge_Great;
+  double Judge_Good;
+  double Judge_Bad;
 };

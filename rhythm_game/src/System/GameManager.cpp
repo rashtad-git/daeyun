@@ -30,6 +30,7 @@ void GameManager::run() {
   This->lastRenderTime = clock();
 
   This->stateManager.Init();
+  This->renderManager.Init();
 
   while (This->isRunning) {
     if (onGameLoop() == false) {

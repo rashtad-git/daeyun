@@ -2,7 +2,7 @@
 
 #include <random>
 
-int Math::GetRandom(int min, int max, std::set<int> exclude) {
+int Math::GetRandom(int min, int max, const std::set<int>& exclude) {
   static std::mt19937 gen(std::random_device{}());
   std::uniform_int_distribution<> dist(min, max);
   int num = dist(gen);
@@ -14,6 +14,10 @@ int Math::GetRandom(int min, int max, std::set<int> exclude) {
 
   while (exclude.find(num) != exclude.end()) {
     num = ((num + 1) % max) + min;
+  }
+
+  if (exclude.find(num) != exclude.end()) {
+    num++;
   }
 
   return num;

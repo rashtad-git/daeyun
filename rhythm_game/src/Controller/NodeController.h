@@ -27,15 +27,14 @@ class NodeController : public IController {
   bool JudgeNode(Node* node) const;
 
  private:
+  double GetDuration(Node* node) const;
+
+ private:
   int prevSigIndex;
   int prevTickIndex;
   bool movedFrame;
   int spawnCount;
   std::set<int> prevLines;
   std::list<Node*> nodePool;
-
-  double judgePerfect;
-  double judgeGreat;
-  double judgeGood;
-  double judgeBad;
+  int startIndex;
 };

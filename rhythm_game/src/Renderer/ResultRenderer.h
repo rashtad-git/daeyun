@@ -3,6 +3,7 @@
 
 class ResultRenderer : public IRenderer {
  public:
+  virtual void Init() override;
   virtual void PreRender() override;
   virtual char OnRender(const Point& p) override;
   virtual void PostRender() override;

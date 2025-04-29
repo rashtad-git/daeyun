@@ -24,6 +24,27 @@ StateManager::~StateManager() {
 }
 
 void StateManager::Init() {
+  auto& game = DataManager::GetInstance().game;
+
+  game.GameState = GameState::Game;
+  // game.IsPlaySound = true;
+  game.Difficulty = Difficulty::Expert;
+  game.NoteSpeed = 2;
+  game.TimeSig.BPM = 160;
+  game.TimeSig.Top = 4;
+  game.TimeSig.Bottom = 4;
+  game.TimeSigIndex = 0;
+  game.TimeSigFrame = 0;
+
+  game.StageNodeCount = 0;
+  game.StageNodes.clear();
+
+  double mul = 1.5;
+  game.Judge_Perfect = 0.04 * mul;
+  game.Judge_Great = 0.09 * mul;
+  game.Judge_Good = 0.15 * mul;
+  game.Judge_Bad = 0.3 * mul;
+
   for (auto& controller : This->controllers) {
     controller->OnInit();
   }

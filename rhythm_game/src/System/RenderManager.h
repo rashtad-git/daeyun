@@ -10,6 +10,7 @@ class RenderManager {
   ~RenderManager();
 
  public:
+  void Init();
   void Render() const;
 
  private:
@@ -18,4 +19,8 @@ class RenderManager {
  private:
   struct PrivateData;
   PrivateData* This;
+
+ private:
+  RenderManager(const RenderManager&) = delete;
+  RenderManager& operator=(const RenderManager&) = delete;
 };

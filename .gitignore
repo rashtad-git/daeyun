@@ -31,5 +31,9 @@
 *.out
 *.app
 
+# custom
 .vs
+*.pdb
 *.vcxproj.user
+rhythm_game/build
+rhythm_game/rhythm_game

@@ -7,17 +7,17 @@ const int OFFSET_BOTTOM = 3;
 
 MetronomeScreen::MetronomeScreen() : prevTimeSigIndex(0) {
   SetPosition(Point(40, 2));
-
-  // SetSize(Size(38,  12));
-  auto& game = DataManager::GetInstance().game;
-  SetSize(Size(38, OFFSET_TOP + OFFSET_BOTTOM + game.TimeSig.Top));
 }
 
 MetronomeScreen::~MetronomeScreen() {}
 
 void MetronomeScreen::Init() {
+  // SetSize(Size(38,  12));
+  auto& game = DataManager::GetInstance().game;
+  auto size = Size(38, OFFSET_TOP + OFFSET_BOTTOM + game.TimeSig.Bottom);
+  SetSize(size);
+
   // guide line
-  auto& size = GetSize();
   for (int x = 0; x < size.width; x++) {
     for (int y = 0; y < size.height; y++) {
       Point p(x, y);
@@ -40,11 +40,10 @@ void MetronomeScreen::Init() {
   DrawString(3, 0, "Metronome");
   SetBoard(Point(12, 0), ' ');
 
-  auto& game = DataManager::GetInstance().game;
   for (int i = 0; i < game.TimeSig.Top; i++) {
     auto p = GetSigIndex(i * game.TimeSig.Bottom);
     SetBoard(Point(p.x, OFFSET_TOP), 'o');
-    SetBoard(Point(p.x, OFFSET_BOTTOM + game.TimeSig.Top), 'o');
+    SetBoard(Point(p.x, OFFSET_BOTTOM + game.TimeSig.Bottom), 'o');
   }
 }
 
@@ -56,13 +55,13 @@ void MetronomeScreen::PreRender() {
     auto prevPoint = GetSigIndex(prevTimeSigIndex);
     SetBoard(prevPoint, ' ');
     SetBoard(Point(prevPoint.x, OFFSET_TOP), 'o');
-    SetBoard(Point(prevPoint.x, OFFSET_BOTTOM + game.TimeSig.Top), 'o');
+    SetBoard(Point(prevPoint.x, OFFSET_BOTTOM + game.TimeSig.Bottom), 'o');
   }
 
   auto currentPoint = GetSigIndex(game.TimeSigIndex);
   SetBoard(currentPoint, '+');
   SetBoard(Point(currentPoint.x, OFFSET_TOP), 'O');
-  SetBoard(Point(currentPoint.x, OFFSET_BOTTOM + game.TimeSig.Top), 'O');
+  SetBoard(Point(currentPoint.x, OFFSET_BOTTOM + game.TimeSig.Bottom), 'O');
 
   prevTimeSigIndex = game.TimeSigIndex;
 }

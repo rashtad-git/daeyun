@@ -5,6 +5,7 @@
 #include "../Models/Math.h"
 
 #include "./Screens/GameScreen.h"
+#include "./Screens/IndicatorScreen.h"
 #include "./Screens/MetronomeScreen.h"
 #include "./Screens/ScoreScreen.h"
 
@@ -17,10 +18,7 @@ GameRenderer::GameRenderer() {
   This->screens.push_back(new GameScreen());
   This->screens.push_back(new ScoreScreen());
   This->screens.push_back(new MetronomeScreen());
-
-  for (auto screen : This->screens) {
-    screen->Init();
-  }
+  This->screens.push_back(new IndicatorScreen());
 }
 
 GameRenderer::~GameRenderer() {
@@ -30,6 +28,12 @@ GameRenderer::~GameRenderer() {
 
   This->screens.clear();
   delete This;
+}
+
+void GameRenderer::Init() {
+  for (auto screen : This->screens) {
+    screen->Init();
+  }
 }
 
 void GameRenderer::PreRender() {

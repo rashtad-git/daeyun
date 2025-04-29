@@ -14,4 +14,8 @@ class StateManager {
  private:
   struct PrivateData;
   PrivateData* This;
+
+ private:
+  StateManager(const StateManager&) = delete;
+  StateManager& operator=(const StateManager&) = delete;
 };

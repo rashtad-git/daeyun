@@ -13,28 +13,30 @@ InputManager::~InputManager() {
   delete This;
 }
 
+void InputManager::Init() {}
+
 void InputManager::Update(double deltaTime) {
   UserData& user = DataManager::GetInstance().user;
-  for (int i = 0; i < Config::BUTTON_COUNT; i++) {
-    bool wasPressed = user.input[i].pressed;
-    bool pressed = (GetAsyncKeyState(user.input[i].key) & 0x8000);
+  for (auto& input : user.input) {
+    bool wasPressed = input.second.pressed;
+    bool pressed = (GetAsyncKeyState(input.second.key) & 0x8000);
 
     bool tapped = pressed && !wasPressed;
     bool released = !pressed && wasPressed;
 
-    user.input[i].tapped = false;
-    user.input[i].pressed = pressed;
+    input.second.tapped = false;
+    input.second.pressed = pressed;
     if (tapped) {
-      user.input[i].tapped = true;
-      user.input[i].effect = true;
-      user.input[i].effectFrame = 0;
+      input.second.tapped = true;
+      input.second.effect = true;
+      input.second.effectFrame = 0;
     }
 
-    if (user.input[i].effect) {
-      user.input[i].effectFrame += deltaTime;
-      if (user.input[i].effectFrame >= 0.3) {
-        user.input[i].effect = false;
-        user.input[i].effectFrame = -1;
+    if (input.second.effect) {
+      input.second.effectFrame += deltaTime;
+      if (input.second.effectFrame >= 0.3) {
+        input.second.effect = false;
+        input.second.effectFrame = -1;
       }
     }
   }

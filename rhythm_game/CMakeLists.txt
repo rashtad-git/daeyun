@@ -1,3 +1,6 @@
+# Set UTF-8 encoding
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+
 cmake_minimum_required(VERSION 3.10)
 
 project(MyProject)
@@ -26,7 +29,7 @@ set_target_properties(MyProject PROPERTIES
 
 # 컴파일러 경고 레벨 높이기
 if (MSVC)
-    target_compile_options(MyProject PRIVATE /W4)
+    target_compile_options(MyProject PRIVATE /W4 /utf-8)
 else()
     target_compile_options(MyProject PRIVATE -Wall -Wextra -pedantic)
 endif()

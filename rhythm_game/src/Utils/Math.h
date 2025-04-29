@@ -4,6 +4,5 @@
 
 class Math {
  public:
-  static int GetRandom(int min, int max,
-                       std::set<int> exclude = std::set<int>());
+  static int GetRandom(int min, int max, const std::set<int>& exclude = {});
 };

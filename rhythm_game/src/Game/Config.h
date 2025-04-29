@@ -6,5 +6,7 @@ struct Config {
 
   static const int BUTTON_COUNT = 4;
 
-  static const int GAME_LINE_HEIGHT = 18;
+  static const int GAME_LINE_HEIGHT = 19;
+  static int GetPerfectJudge() { return GAME_LINE_HEIGHT - 3; }
+  static int GetJudgeEnd() { return GAME_LINE_HEIGHT + 2; }
 };

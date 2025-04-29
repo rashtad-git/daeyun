@@ -14,4 +14,8 @@ class GameManager {
  private:
   struct PrivateData;
   PrivateData* This;
+
+ private:
+  GameManager(const GameManager&) = delete;
+  GameManager& operator=(const GameManager&) = delete;
 };

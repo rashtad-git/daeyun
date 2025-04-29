@@ -1,5 +1,6 @@
 #include "NodeController.h"
 
+#include <cmath>
 #include <list>
 
 #include "../System/DataManager.h"
@@ -7,7 +8,11 @@
 #include "./Node/Node.h"
 
 NodeController::NodeController()
-    : prevSigIndex(0), prevTickIndex(0), movedFrame(false), spawnCount(0) {}
+    : prevSigIndex(0),
+      prevTickIndex(0),
+      movedFrame(false),
+      spawnCount(0),
+      startIndex(0) {}
 
 NodeController::~NodeController() {
   for (auto node : nodePool) {
@@ -21,19 +26,20 @@ void NodeController::OnInit() {
   prevSigIndex = 0;
   spawnCount = 0;
 
+  int judgeLine = Config::GetPerfectJudge();
+  startIndex = -1;  // 1 - judgeLine * game.NoteSpeed;
+
   InitJudge();
 }
 
 void NodeController::OnUpdate(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
 
-  // ���ο� ��� ����
   OnSpawn(deltaTime);
 
-  OnMove(deltaTime);
   OnJudge(deltaTime);
+  OnMove(deltaTime);
 
-  // ��尡 hit �Ǿ��� �� ����Ʈ�� pool�� �ǵ����� ó��
   OnCleanup(deltaTime);
 
   prevSigIndex = game.TimeSigIndex;
@@ -45,14 +51,14 @@ void NodeController::OnSpawn(double deltaTime) {
   if (game.TimeSigIndex == prevSigIndex)
     return;
 
-  int sigIndex = (game.TimeSigIndex + Config::GAME_LINE_HEIGHT - 2) %
-                 game.TimeSig.GetMaxIndex();
+  int sigIndex = game.TimeSigIndex;
 
   int count = 1;
   switch (game.Difficulty) {
       // Beginner�� ù�ڸ� 1���� ��Ʈ ����
     case Difficulty::Beginner:
-      if (sigIndex == 0)
+      //if (sigIndex == 0)
+      if (sigIndex % game.TimeSig.Bottom == 0)
         break;
       return;
 
@@ -131,7 +137,6 @@ void NodeController::OnSpawn(double deltaTime) {
     int line = Math::GetRandom(0, 3, lines);
     GenNode(line);
 
-    lines.insert(line);
     prevLines.insert(line);
   }
 }
@@ -139,13 +144,9 @@ void NodeController::OnSpawn(double deltaTime) {
 void NodeController::OnMove(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
 
-  double tick = game.TimeSig.GetTick() / game.NoteSpeed;
-  double frame = game.TimeSigFrame;
-  int tickIndex = 0;
-  while (frame > tick) {
-    frame -= tick;
-    tickIndex++;
-  }
+  double tick = game.TimeSig.GetTick();
+  double frame = game.TimeSigFrame * game.NoteSpeed;
+  int tickIndex = static_cast<int>(std::floor(frame / tick));
 
   if (game.TimeSigIndex == prevSigIndex && prevTickIndex == tickIndex)
     return;
@@ -156,7 +157,7 @@ void NodeController::OnMove(double deltaTime) {
     if (node->IsActive() == false)
       continue;
 
-    if (node->IsHit())
+    if (node->HasEffect())
       continue;
 
     node->Move();
@@ -168,11 +169,16 @@ void NodeController::OnJudge(double deltaTime) {
   auto& user = DataManager::GetInstance().user;
 
   for (int line = 0; line < Config::BUTTON_COUNT; line++) {
-    if (user.input[line].tapped == false)
+    const auto& button = user.input.find(ActionButtons[line]);
+    if (button == user.input.end())
+      continue;
+
+    if (button->second.tapped == false)
       continue;
 
     for (auto node : game.StageNodes) {
-      if (node->IsHit() || node->GetLine() != line)
+      if (node->IsActive() == false || node->HasEffect() ||
+          node->GetLine() != line)
         continue;
 
       int index = node->GetIndex();
@@ -184,8 +190,15 @@ void NodeController::OnJudge(double deltaTime) {
   }
 
   for (Node* node : game.StageNodes) {
-    if (node->GetIndex() > Config::GAME_LINE_HEIGHT) {
-      node->SetActive(false);
+    if (node->IsActive() == false || node->HasEffect())
+      continue;
+
+    if (game.Judge_Bad < GetDuration(node)) {
+      node->SetMiss();
+      user.scores[ScoreTypes::Miss]++;
+    } else if (node->GetIndex() > Config::GetJudgeEnd()) {
+      node->Back();
+      node->SetMiss();
       user.scores[ScoreTypes::Miss]++;
     }
   }
@@ -211,20 +224,13 @@ void NodeController::OnCleanup(double deltaTime) {
 void NodeController::InitJudge() {
   auto& game = DataManager::GetInstance().game;
 
-  // Judge
-  int perfectJudge = Config::GAME_LINE_HEIGHT - 1;
-  const double tick = game.TimeSig.GetTick();
+  // // Judge
+  // const double tick = game.TimeSig.GetTick();
 
-  judgePerfect = tick / 4;
-  judgeGreat = tick / 2;
-  judgeGood = tick;
-  judgeBad = tick * 2;
-
-  //
-  judgePerfect = 0.022;
-  judgeGreat = 0.045;
-  judgeGood = 0.09;
-  judgeBad = 0.15;
+  // game.Judge_Perfect = tick / 4;
+  // game.Judge_Great = tick / 2;
+  // game.Judge_Good = tick;
+  // game.Judge_Bad = tick * 2;
 }
 
 void NodeController::GenNode(int line) {
@@ -237,7 +243,7 @@ void NodeController::GenNode(int line) {
   auto node = nodePool.front();
   nodePool.pop_front();
 
-  node->Init(line);
+  node->Init(line, startIndex);
   game.StageNodes.push_back(node);
 }
 
@@ -245,49 +251,44 @@ bool NodeController::JudgeNode(Node* node) const {
   auto& game = DataManager::GetInstance().game;
   auto& user = DataManager::GetInstance().user;
 
-  int index = node->GetIndex();
-  //if (index < Config::GAME_LINE_HEIGHT - 3)
-  //	return false;
+  double duration = GetDuration(node);
 
-  // Judge
-  int perfectJudge = Config::GAME_LINE_HEIGHT - 2;
-  int judgeLine = index - perfectJudge;
-  const double tick = game.TimeSig.GetTick();
-
-  double duration = 0;
-  bool isFast = true;
-  if (judgeLine >= 0) {
-    duration = game.TimeSigFrame + judgeLine * tick;
-  } else {
-    duration = (tick - game.TimeSigFrame + std::abs(judgeLine + 1) * tick);
-  }
-
-  if (duration < judgePerfect) {
+  double judge = std::abs(duration);
+  if (judge < game.Judge_Perfect) {
     user.scores[ScoreTypes::Perfect]++;
-
-    // perfect�� �� ��ĭ ����
-    if (judgeLine < 0)
-      node->Move();
-  } else if (duration < judgeGreat) {
+  } else if (judge < game.Judge_Great) {
     user.scores[ScoreTypes::Great]++;
-  } else if (duration < judgeGood) {
+  } else if (judge < game.Judge_Good) {
     user.scores[ScoreTypes::Good]++;
-  } else if (duration < judgeBad) {
+  } else if (judge < game.Judge_Bad) {
     user.scores[ScoreTypes::Bad]++;
   } else {
     return false;
   }
 
-  if (duration > judgePerfect) {
-    if (judgeLine < 0) {
-      user.fastIndicator.push_back(duration);
+  if (judge >= game.Judge_Perfect) {
+    if (duration < 0) {
+      user.fastIndicator.push_back(judge);
     } else {
-      user.lateIndicator.push_back(duration);
+      user.lateIndicator.push_back(judge);
     }
   }
 
-  game.debugJudge += duration;
-
-  node->SetIsHit(true);
+  node->SetHit();
   return true;
+}
+
+double NodeController::GetDuration(Node* node) const {
+  auto& game = DataManager::GetInstance().game;
+
+  int index = node->GetIndex();
+
+  // 판정선. 0이면 판정선 위에 있음
+  int judgeLine = index - Config::GetPerfectJudge();
+
+  // 노트 하나 이동하는 시간
+  const double tick = game.TimeSig.GetTick() / game.NoteSpeed;
+
+  // 판정선 위에 있는 노트의 시간
+  return game.TimeSigFrame / game.NoteSpeed + judgeLine * tick - tick * 0.5;
 }

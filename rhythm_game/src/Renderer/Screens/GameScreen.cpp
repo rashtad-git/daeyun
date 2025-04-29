@@ -15,7 +15,7 @@ GameScreen::GameScreen() {
   // line split = 1 * 3
   // edge 2
 
-  SetSize(Size(3 * 4 + 3 + 2, Config::GAME_LINE_HEIGHT + 3));
+  SetSize(Size(3 * 4 + 3 + 2, Config::GAME_LINE_HEIGHT + 2));
 }
 
 GameScreen::~GameScreen() {}
@@ -51,7 +51,7 @@ void GameScreen::Init() {
         // Button
         int line = x / 4;
         if (y == size.height - 2) {
-          SetBoard(p, user.input[line].key);
+          SetBoard(p, user.input.at(ActionButtons[line]).key);
         }
       } else if ((x % 4 == 1 || x % 4 == 3) && y == size.height - 5) {
         // Judgment line
@@ -72,16 +72,20 @@ void GameScreen::DrawTapped() {
   auto& size = GetSize();
   auto& user = DataManager::GetInstance().user;
   for (int i = 0; i < Config::BUTTON_COUNT; i++) {
+    const auto& button = user.input.find(ActionButtons[i]);
+    if (button == user.input.end())
+      continue;
+
     int x = (i + 1) * 4 - 2;
     int y = size.height - 1;
     Point p(x, y);
-    if (user.input[i].effectFrame > 0) {
-      if (user.input[i].effectFrame < 0.15) {
+    if (button->second.effectFrame > 0) {
+      if (button->second.effectFrame < 0.15) {
         SetBoard(p, '*');
       } else {
         SetBoard(p, '+');
       }
-    } else if (user.input[i].pressed) {
+    } else if (button->second.pressed) {
       SetBoard(p, '-');
     } else {
       SetBoard(p, ' ');
@@ -101,13 +105,21 @@ void GameScreen::DrawNode() {
   }
 
   for (auto node : game.StageNodes) {
+    if (node->IsActive() == false)
+      continue;
+
     int line = node->GetLine();
     int index = node->GetIndex();
 
-    if (index > Config::GAME_LINE_HEIGHT)
+    if (index > Config::GetJudgeEnd())
       continue;
 
-    Point p(2 + line * 4, index);
+    int perfectJudge = Config::GetPerfectJudge();
+    int judge = index - perfectJudge;
+    if (judge > 0)
+      judge /= 2;
+
+    Point p(2 + line * 4, perfectJudge + judge);
     SetBoard(p, node->GetGraphic());
   }
 }
