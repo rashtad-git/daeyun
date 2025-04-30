@@ -5,11 +5,12 @@
 #include "../../System/DataManager.h"
 
 const int INDICATOR_WIDTH = 49;
+const int INDICATOR_HEIGHT = 5;
 
 IndicatorScreen::IndicatorScreen() {
-  SetPosition(Point(27, 16));
+  SetPosition(Point(27, 14));
 
-  SetSize(Size(INDICATOR_WIDTH + 2, 7));
+  SetSize(Size(INDICATOR_WIDTH + 2, INDICATOR_HEIGHT + 4));
 }
 
 IndicatorScreen::~IndicatorScreen() {}
@@ -22,12 +23,11 @@ void IndicatorScreen::Init() {
   auto& game = DataManager::GetInstance().game;
 
   DrawString(0, 0, " ---- Indicator ---------------------------------- ");
-  DrawString(0, 1, "|                                                 |");
-  DrawString(0, 2, "|                                                 |");
-  DrawString(0, 3, "|                                                 |");
-  DrawString(0, 4, "|                                                 |");
-  DrawString(0, 5, "|                                                 |");
-  DrawString(0, 6, " ------------------------------------------------- ");
+  for (int i = 0; i < INDICATOR_HEIGHT + 2; i++) {
+    DrawString(0, 1 + i, "|                                                 |");
+  }
+  DrawString(0, INDICATOR_HEIGHT + 3,
+             " ------------------------------------------------- ");
 
   game.Judge_Bad;
 
@@ -38,7 +38,7 @@ void IndicatorScreen::Init() {
   int great_positive = IndicateToPoint(game.Judge_Great);
   int good_positive = IndicateToPoint(game.Judge_Good);
 
-  int barPosY = 4;
+  int barPosY = INDICATOR_HEIGHT + 1;
   int width = (INDICATOR_WIDTH - 1) / 2;
   for (int i = 0; i < width; i++) {
 
@@ -85,29 +85,31 @@ void IndicatorScreen::PreRender() {
 
   prevCount = user.indicator.size();
 
-  const char judgeChars[] = {'_', '-', '=', '+', '^'};
+  const char judgeChars[] = {'_', 'o', '-', '=', '+', '*',
+                             'O', 'I', 'T', '^', '|'};
   const int judgeCharSize = sizeof(judgeChars) / sizeof(judgeChars[0]);
-  const int judgeCharHeight = 3;
 
   // clear
   for (int i = 0; i < INDICATOR_WIDTH; i++) {
-    DrawChar(1 + i, 3, ' ');
-    DrawChar(1 + i, 2, ' ');
-    DrawChar(1 + i, 1, ' ');
+    for (int j = 0; j < INDICATOR_HEIGHT; j++) {
+      DrawChar(1 + i, j + 1, ' ');
+    }
   }
 
   for (auto iter : judgeCount) {
     int point = iter.first;
     int value = iter.second;
 
-    if (value > judgeCharSize * judgeCharHeight) {
-      value = judgeCharSize * judgeCharHeight;
+    if (value > judgeCharSize * INDICATOR_HEIGHT) {
+      value = judgeCharSize * INDICATOR_HEIGHT;
     }
 
     int height = 0;
     while (value > 0) {
-      char c = judgeChars[value % judgeCharSize];
-      DrawChar(1 + point, 3 - height, c);
+      char c = value >= judgeCharSize
+                   ? '|'
+                   : judgeChars[((value - 1) % judgeCharSize)];
+      DrawChar(1 + point, INDICATOR_HEIGHT - height, c);
       height++;
       value -= judgeCharSize;
     }
