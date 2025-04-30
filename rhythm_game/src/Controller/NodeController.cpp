@@ -268,12 +268,13 @@ bool NodeController::JudgeNode(Node* node) const {
 
   if (judge >= game.Judge_Perfect) {
     if (duration < 0) {
-      user.fastIndicator.push_back(judge);
+      user.fastCount++;
     } else {
-      user.lateIndicator.push_back(judge);
+      user.slowCount++;
     }
   }
 
+  user.indicator.push_back(duration);
   node->SetHit();
   return true;
 }

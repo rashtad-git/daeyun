@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Windows.h>
-#include <list>
 #include <map>
+#include <vector>
 
 #include "../Game/Config.h"
 
@@ -43,8 +43,10 @@ struct UserData {
  public:
   std::map<InputControl, ButtonState> input;
   std::map<ScoreTypes, int> scores;
-  std::list<double> fastIndicator;
-  std::list<double> lateIndicator;
+
+  std::vector<double> indicator;
+  int fastCount;
+  int slowCount;
 
   UserData() {
     input.insert({InputControl::Left, VK_LEFT});

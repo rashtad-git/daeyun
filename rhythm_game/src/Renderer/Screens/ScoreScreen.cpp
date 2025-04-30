@@ -9,7 +9,7 @@ const int SCORE_LINE_BAD = 3;
 const int SCORE_LINE_MISS = 4;
 
 const int SCORE_LINE_FAST = 7;
-const int SCORE_LINE_LATE = 8;
+const int SCORE_LINE_SLOW = 8;
 
 int GetScoreHeight(ScoreTypes score) {
   switch (score) {
@@ -48,7 +48,7 @@ void ScoreScreen::Init() {
   DrawString(0, SCORE_LINE_MISS, "MISS");
 
   DrawString(0, SCORE_LINE_FAST, "FAST");
-  DrawString(0, SCORE_LINE_LATE, "LATE");
+  DrawString(0, SCORE_LINE_SLOW, "SLOW");
 
   DrawString(13, SCORE_LINE_PERFECT, "0");
   DrawString(13, SCORE_LINE_GREAT, "0");
@@ -56,7 +56,7 @@ void ScoreScreen::Init() {
   DrawString(13, SCORE_LINE_BAD, "0");
   DrawString(13, SCORE_LINE_MISS, "0");
   DrawString(13, SCORE_LINE_FAST, "0");
-  DrawString(13, SCORE_LINE_LATE, "0");
+  DrawString(13, SCORE_LINE_SLOW, "0");
 }
 
 void ScoreScreen::PreRender() {
@@ -76,8 +76,8 @@ void ScoreScreen::PreRender() {
     DrawNumber(10, y, score, 4);
   }
 
-  DrawNumber(10, SCORE_LINE_FAST, (int)user.fastIndicator.size(), 4);
-  DrawNumber(10, SCORE_LINE_LATE, (int)user.lateIndicator.size(), 4);
+  DrawNumber(10, SCORE_LINE_FAST, user.fastCount, 4);
+  DrawNumber(10, SCORE_LINE_SLOW, user.slowCount, 4);
 }
 
 void ScoreScreen::PostRender() {

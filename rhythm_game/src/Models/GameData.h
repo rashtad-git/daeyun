@@ -34,6 +34,7 @@ struct TimeSignature {
 
 struct GameData {
   GameState GameState;
+  double GameTime;
 
   bool IsPlaySound = true;
   Difficulty Difficulty;

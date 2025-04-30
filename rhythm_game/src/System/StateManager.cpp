@@ -27,6 +27,7 @@ void StateManager::Init() {
   auto& game = DataManager::GetInstance().game;
 
   game.GameState = GameState::Game;
+  game.GameTime = 0;
   // game.IsPlaySound = true;
   game.Difficulty = Difficulty::Expert;
   game.NoteSpeed = 2;
@@ -51,6 +52,9 @@ void StateManager::Init() {
 }
 
 void StateManager::Update(double deltaTime) {
+  auto& game = DataManager::GetInstance().game;
+  game.GameTime += deltaTime;
+
   for (auto controller : This->controllers) {
     controller->OnUpdate(deltaTime);
   }
