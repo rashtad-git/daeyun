@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "System/DataManager.h"
+#include "../../System/DataManager.h"
 
 const int INDICATOR_WIDTH = 49;
 
@@ -17,7 +17,7 @@ IndicatorScreen::~IndicatorScreen() {}
 void IndicatorScreen::Init() {
 
   prevCount = 0;
-  judges.empty();
+  judgePoints.empty();
 
   auto& game = DataManager::GetInstance().game;
 
@@ -44,19 +44,19 @@ void IndicatorScreen::Init() {
 
     char c = '-';
     if (i < good_negative) {
-      c = '_';  // bad
+      c = '~';  // bad
     } else if (i < great_negative) {
-      c = '~';  // good
+      c = '-';  // good
     } else if (i < perfect_negative) {
       c = '=';  // great
     } else if (i < perfect_positive) {
-      c = '^';  // perfect
+      c = '+';  // perfect
     } else if (i < great_positive) {
       c = '=';  // great
     } else if (i < good_positive) {
-      c = '~';  // good
+      c = '-';  // good
     } else {
-      c = '_';  // bad
+      c = '~';  // bad
     }
 
     DrawChar(1 + i, barPosY, c);
@@ -75,24 +75,71 @@ void IndicatorScreen::PreRender() {
   auto& user = DataManager::GetInstance().user;
 
   int count = user.indicator.size() - prevCount;
-  while (prevCount < count) {
-    double judge = user.indicator[prevCount];
+  for (int i = 0; i < count; i++) {
+    double judge = user.indicator[prevCount + i];
 
     int point = IndicateToPoint(judge);
     judgeCount[point]++;
-    judgePoints.push(std::make_pair(game.GameTime, point));
+    judgePoints.push_back(std::make_pair(game.GameTime, point));
+  }
 
-    prevCount++;
+  prevCount = user.indicator.size();
+
+  const char judgeChars[] = {'_', '-', '=', '+', '^'};
+  const int judgeCharSize = sizeof(judgeChars) / sizeof(judgeChars[0]);
+  const int judgeCharHeight = 3;
+
+  // clear
+  for (int i = 0; i < INDICATOR_WIDTH; i++) {
+    DrawChar(1 + i, 3, ' ');
+    DrawChar(1 + i, 2, ' ');
+    DrawChar(1 + i, 1, ' ');
+  }
+
+  for (auto iter : judgeCount) {
+    int point = iter.first;
+    int value = iter.second;
+
+    if (value > judgeCharSize * judgeCharHeight) {
+      value = judgeCharSize * judgeCharHeight;
+    }
+
+    int height = 0;
+    while (value > 0) {
+      char c = judgeChars[value % judgeCharSize];
+      DrawChar(1 + point, 3 - height, c);
+      height++;
+      value -= judgeCharSize;
+    }
   }
 }
 
-void IndicatorScreen::PostRender() {}
+void IndicatorScreen::PostRender() {
+  if (judgePoints.empty()) {
+    return;
+  }
+
+  auto& game = DataManager::GetInstance().game;
+  double limitTime = game.GameTime - 3;
+  auto front = judgePoints.front();
+  while (front.first < limitTime) {
+    judgeCount[front.second]--;
+    judgePoints.pop_front();
+    if (judgePoints.empty()) {
+      break;
+    }
+
+    front = judgePoints.front();
+  }
+}
 
 int IndicatorScreen::IndicateToPoint(double indicate) {
   auto& game = DataManager::GetInstance().game;
 
   int half = (INDICATOR_WIDTH - 1) * 0.5;
   double percent = std::abs(indicate) / game.Judge_Bad;
+  if (percent > 1)
+    percent = 1;
   int point = (int)(half * percent);
   if (indicate < 0) {
     point = half - point;

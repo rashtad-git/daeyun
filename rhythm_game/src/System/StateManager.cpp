@@ -29,7 +29,7 @@ void StateManager::Init() {
   game.GameState = GameState::Game;
   game.GameTime = 0;
   // game.IsPlaySound = true;
-  game.Difficulty = Difficulty::Expert;
+  game.Difficulty = Difficulty::VeryHard;
   game.NoteSpeed = 2;
   game.TimeSig.BPM = 160;
   game.TimeSig.Top = 4;

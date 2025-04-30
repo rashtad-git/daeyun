@@ -1,7 +1,7 @@
 #pragma once
 
+#include <deque>
 #include <map>
-#include <queue>
 
 #include "../ScreenBase.h"
 
@@ -19,6 +19,7 @@ class IndicatorScreen : public ScreenBase {
 
   // gameTime, judgePoint
   int prevCount;
-  std::queue<std::pair<double, int>> judgePoints;
+  std::deque<std::pair<double, int>> judgePoints;
+  // judgePoint, count
   std::map<int, int> judgeCount;
 };
