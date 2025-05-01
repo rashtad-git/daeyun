@@ -17,6 +17,9 @@ class RenderManager {
   std::stringstream OnRender(IRenderer* renderer) const;
 
  private:
+  void DebugPrint(std::stringstream& buffer, int y) const;
+
+ private:
   struct PrivateData;
   PrivateData* This;
 

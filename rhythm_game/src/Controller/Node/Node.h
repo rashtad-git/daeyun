@@ -17,13 +17,16 @@ class Node {
   char GetGraphic() const { return graphic; }
 
   int GetIndex() const { return index; }
-  void Move() { index++; }
   void Back() { index--; }
 
  public:
-  void Init(int line, int index = 0);
+  void Init(int line);
   void OnEffect(double deltaTime);
   void Clear();
+
+  double GetElapsed() const;
+  bool Move();
+  double GetTimeToJudgmentLine() const;
 
  private:
   void OnHit(double deltaTime);
@@ -32,9 +35,12 @@ class Node {
  private:
   int line;
   int index;
+  bool isMoved;
   bool isHit;
   bool isMiss;
   bool isActive;
+
+  double spawnTime;
 
   double hitFrame;
   double missFrame;

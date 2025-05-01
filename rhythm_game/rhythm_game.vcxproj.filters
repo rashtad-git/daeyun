@@ -72,7 +72,10 @@
     <ClCompile Include="src\System\SoundManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="src\Renderer\Screens\TitleScreen.cpp">
+    <ClCompile Include="src\Renderer\Screens\OptionScreen.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Controller\SceneController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -158,7 +161,10 @@
     <ClInclude Include="src\Utils\Singleton.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="src\Renderer\Screens\TitleScreen.h">
+    <ClInclude Include="src\Renderer\Screens\OptionScreen.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Controller\SceneController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

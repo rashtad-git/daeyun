@@ -9,24 +9,24 @@ MeterController::~MeterController() {}
 
 void MeterController::OnInit() {
   auto& game = DataManager::GetInstance().game;
-  game.TimeSigIndex = game.TimeSig.GetMaxIndex() - 1;
+  game.currentBeatIndex = game.BeatInfo.GetTotalBeats() - 1;
 }
 
 void MeterController::OnUpdate(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
-  game.TimeSigFrame += deltaTime;
+  game.currentBeatFrame += deltaTime;
 
-  double tick = game.TimeSig.GetTick();
+  double beatInterval = game.BeatInfo.GetBeatInterval();
 
-  if (game.TimeSigFrame > tick) {
-    game.TimeSigFrame -= tick;
-    game.TimeSigIndex++;
-    if (game.TimeSigIndex == game.TimeSig.GetMaxIndex()) {
-      game.TimeSigIndex = 0;
+  if (game.currentBeatFrame > beatInterval) {
+    game.currentBeatFrame -= beatInterval;
+    game.currentBeatIndex++;
+    if (game.currentBeatIndex == game.BeatInfo.GetTotalBeats()) {
+      game.currentBeatIndex = 0;
     }
 
-    if (game.IsPlaySound && game.TimeSigIndex % game.TimeSig.Bottom == 0) {
-      if (game.TimeSigIndex == 0)
+    if (game.IsPlaySound && game.currentBeatIndex % game.BeatInfo.Bottom == 0) {
+      if (game.currentBeatIndex == 0)
         SoundManager::GetInstance().Play(880, 150);
       else
         SoundManager::GetInstance().Play(660, 100);

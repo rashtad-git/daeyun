@@ -9,6 +9,10 @@ class ResultRenderer : public IRenderer {
   virtual void PostRender() override;
 
  public:
-  ResultRenderer() = default;
-  virtual ~ResultRenderer() = default;
+  ResultRenderer();
+  virtual ~ResultRenderer() override;
+
+ private:
+  struct PrivateData;
+  PrivateData* This;
 };

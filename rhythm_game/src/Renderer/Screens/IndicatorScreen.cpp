@@ -29,14 +29,12 @@ void IndicatorScreen::Init() {
   DrawString(0, INDICATOR_HEIGHT + 3,
              " ------------------------------------------------- ");
 
-  game.Judge_Bad;
-
-  int good_negative = IndicateToPoint(-game.Judge_Good);
-  int great_negative = IndicateToPoint(-game.Judge_Great);
-  int perfect_negative = IndicateToPoint(-game.Judge_Perfect);
-  int perfect_positive = IndicateToPoint(game.Judge_Perfect);
-  int great_positive = IndicateToPoint(game.Judge_Great);
-  int good_positive = IndicateToPoint(game.Judge_Good);
+  int good_negative = IndicateToPoint(-game.GetJudge(ScoreTypes::Good));
+  int great_negative = IndicateToPoint(-game.GetJudge(ScoreTypes::Great));
+  int perfect_negative = IndicateToPoint(-game.GetJudge(ScoreTypes::Perfect));
+  int perfect_positive = IndicateToPoint(game.GetJudge(ScoreTypes::Perfect));
+  int great_positive = IndicateToPoint(game.GetJudge(ScoreTypes::Great));
+  int good_positive = IndicateToPoint(game.GetJudge(ScoreTypes::Good));
 
   int barPosY = INDICATOR_HEIGHT + 1;
   int width = (INDICATOR_WIDTH - 1) / 2;
@@ -48,11 +46,11 @@ void IndicatorScreen::Init() {
     } else if (i < great_negative) {
       c = '-';  // good
     } else if (i < perfect_negative) {
-      c = '=';  // great
+      c = '+';  // great
     } else if (i < perfect_positive) {
-      c = '+';  // perfect
+      c = '*';  // perfect
     } else if (i < great_positive) {
-      c = '=';  // great
+      c = '+';  // great
     } else if (i < good_positive) {
       c = '-';  // good
     } else {
@@ -139,7 +137,7 @@ int IndicatorScreen::IndicateToPoint(double indicate) {
   auto& game = DataManager::GetInstance().game;
 
   int half = (INDICATOR_WIDTH - 1) * 0.5;
-  double percent = std::abs(indicate) / game.Judge_Bad;
+  double percent = std::abs(indicate) / game.GetJudge(ScoreTypes::Bad);
   if (percent > 1)
     percent = 1;
   int point = (int)(half * percent);

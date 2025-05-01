@@ -92,23 +92,27 @@ void ScoreScreen::PreRender() {
   DrawNumber(10, SCORE_LINE_FAST, user.fastCount, 4);
   DrawNumber(10, SCORE_LINE_SLOW, user.slowCount, 4);
 
-  auto lastMissIter = user.scores.find(ScoreTypes::Miss);
-  if (lastMissIter != user.scores.end() && lastMissIter->second != lastMiss) {
-    DrawString(7, SCORE_LINE_JUDGE, "  Miss!");
-    lastMiss = lastMissIter->second;
-  } else if (user.indicator.size() != lastNodeCount) {
-    double lastJudge = std::abs(user.indicator.back());
-    if (lastJudge < game.Judge_Perfect) {
-      DrawString(7, SCORE_LINE_JUDGE, "PERFECT");
-    } else if (lastJudge < game.Judge_Great) {
-      DrawString(7, SCORE_LINE_JUDGE, "  Great");
-    } else if (lastJudge < game.Judge_Good) {
-      DrawString(7, SCORE_LINE_JUDGE, "   Good");
-    } else if (lastJudge < game.Judge_Bad) {
-      DrawString(7, SCORE_LINE_JUDGE, "    Bad");
-    }
+  if (user.scores.size() == 0) {
+    DrawString(7, SCORE_LINE_JUDGE, "       ");
+  } else {
+    auto lastMissIter = user.scores.find(ScoreTypes::Miss);
+    if (lastMissIter != user.scores.end() && lastMissIter->second != lastMiss) {
+      DrawString(7, SCORE_LINE_JUDGE, "  Miss!");
+      lastMiss = lastMissIter->second;
+    } else if (user.indicator.size() != lastNodeCount) {
+      double lastJudge = std::abs(user.indicator.back());
+      if (lastJudge < game.GetJudge(ScoreTypes::Perfect)) {
+        DrawString(7, SCORE_LINE_JUDGE, "PERFECT");
+      } else if (lastJudge < game.GetJudge(ScoreTypes::Great)) {
+        DrawString(7, SCORE_LINE_JUDGE, "  Great");
+      } else if (lastJudge < game.GetJudge(ScoreTypes::Good)) {
+        DrawString(7, SCORE_LINE_JUDGE, "   Good");
+      } else if (lastJudge < game.GetJudge(ScoreTypes::Bad)) {
+        DrawString(7, SCORE_LINE_JUDGE, "    Bad");
+      }
 
-    lastNodeCount = user.indicator.size();
+      lastNodeCount = user.indicator.size();
+    }
   }
   DrawNumber(10, SCORE_LINE_COMBO, user.comboCount, 4);
 }

@@ -95,7 +95,7 @@ void GameScreen::DrawTapped() {
 
 void GameScreen::DrawNode() {
   auto& size = GetSize();
-  auto& game = DataManager::GetInstance().game;
+  const auto& game = DataManager::GetInstance().game;
 
   for (int i = 0; i < 4; ++i) {
     for (int y = 0; y < size.height - 2; y++) {
@@ -104,7 +104,7 @@ void GameScreen::DrawNode() {
     }
   }
 
-  for (auto node : game.StageNodes) {
+  for (auto& node : game.StageNodes) {
     if (node->IsActive() == false)
       continue;
 

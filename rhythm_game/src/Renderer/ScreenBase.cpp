@@ -1,5 +1,7 @@
 #include "ScreenBase.h"
 
+#include <cstdio>
+
 const char ScreenBase::GetBoard(const Point& p) const {
   int i = GetIndex(p);
   if (i < 0 || i >= screen.size.width * screen.size.height)
@@ -53,4 +55,18 @@ void ScreenBase::DrawString(int x, int y, const char* message, int length) {
   for (int i = 0; i < length - 1; i++) {
     DrawChar(x + i, y, message[i]);
   }
+}
+
+void ScreenBase::DrawDouble(int x, int y, double value, int precision) {
+  int r = 1;
+  for (int i = 0; i < precision; i++) {
+    r *= 10;
+  }
+
+  int decimal = (int)(value * r) % r;
+  int integer = (int)(value * r) / r;
+
+  DrawNumber(x, y, integer, 1);
+  DrawChar(x + 1, y, '.');
+  DrawNumber(x + 2, y, decimal, precision);
 }

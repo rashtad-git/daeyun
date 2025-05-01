@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Controller\SceneController.cpp" />
     <ClCompile Include="src\System\SoundManager.cpp" />
     <ClCompile Include="src\Controller\MeterController.cpp" />
     <ClCompile Include="src\Controller\NodeController.cpp" />
@@ -38,9 +39,10 @@
     <ClCompile Include="src\System\RenderManager.cpp" />
     <ClCompile Include="src\Renderer\TitleRenderer.cpp" />
     <ClCompile Include="src\Utils\Math.cpp" />
-    <ClCompile Include="src\Renderer\Screens\TitleScreen.cpp" />
+    <ClCompile Include="src\Renderer\Screens\OptionScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Controller\SceneController.h" />
     <ClInclude Include="src\System\SoundManager.h" />
     <ClInclude Include="src\Controller\MeterController.h" />
     <ClInclude Include="src\Controller\IController.h" />
@@ -68,7 +70,7 @@
     <ClInclude Include="src\Renderer\TitleRenderer.h" />
     <ClInclude Include="src\Utils\Math.h" />
     <ClInclude Include="src\Utils\Singleton.h" />
-    <ClInclude Include="src\Renderer\Screens\TitleScreen.h" />
+    <ClInclude Include="src\Renderer\Screens\OptionScreen.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

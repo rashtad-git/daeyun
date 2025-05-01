@@ -23,18 +23,13 @@ class NodeController : public IController {
   void OnCleanup(double deltaTime);
 
  private:
-  void GenNode(int line);
+  int GenerateNodeCountPerBeat(int beatIndex) const;
+  void GenerateNode(int count);
   bool JudgeNode(double duration) const;
 
  private:
-  double GetDuration(Node* node) const;
-
- private:
-  int prevSigIndex;
-  int prevTickIndex;
-  bool movedFrame;
-  int spawnCount;
+  int prevBeatIndex;
   std::set<int> spawnLines;
   std::list<Node*> nodePool;
-  int startIndex;
+  bool started;
 };

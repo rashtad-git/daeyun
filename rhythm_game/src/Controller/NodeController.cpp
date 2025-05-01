@@ -1,18 +1,12 @@
 #include "NodeController.h"
 
-#include <cmath>
 #include <list>
 
 #include "../System/DataManager.h"
 #include "../Utils/Math.h"
 #include "./Node/Node.h"
 
-NodeController::NodeController()
-    : prevSigIndex(0),
-      prevTickIndex(0),
-      movedFrame(false),
-      spawnCount(0),
-      startIndex(0) {}
+NodeController::NodeController() : prevBeatIndex(0) {}
 
 NodeController::~NodeController() {
   for (auto node : nodePool) {
@@ -23,167 +17,75 @@ NodeController::~NodeController() {
 void NodeController::OnInit() {
   auto& game = DataManager::GetInstance().game;
 
-  prevSigIndex = 0;
-  spawnCount = 0;
-
-  int judgeLine = Config::GetPerfectJudge();
-  startIndex = -1;  // 1 - judgeLine * game.NoteSpeed;
+  prevBeatIndex = 0;
+  started = false;
 }
 
 void NodeController::OnUpdate(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
+
+  OnCleanup(deltaTime);
+
+  if (game.GameState != GameState::Title && game.GameState != GameState::Game) {
+    return;
+  }
 
   OnSpawn(deltaTime);
 
   OnJudge(deltaTime);
   OnMove(deltaTime);
 
-  OnCleanup(deltaTime);
-
-  prevSigIndex = game.TimeSigIndex;
+  prevBeatIndex = game.currentBeatIndex;
 }
 
 void NodeController::OnSpawn(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
 
-  if (game.TimeSigIndex == prevSigIndex)
+  if (game.currentBeatIndex == prevBeatIndex)
     return;
 
-  int sigIndex = game.TimeSigIndex;
+  int maxBeat = game.BeatInfo.GetTotalBeats();
 
-  int count = 0;
-  switch (game.Difficulty) {
-    case Difficulty::Beginner:
-      if (sigIndex == 0) {
-        // 1마디에 1~2개 노트
-        count = Math::GetRandom(0, 1) + 1;
-      }
-      break;
+  // 판정선까지 도달하는데 걸리는 시간 계산
+  double timeToJudgment = static_cast<double>(Config::GetPerfectJudge());
 
-    case Difficulty::Easy:
-      if (sigIndex == 0) {
-        // 매 마디에 1~2개 노트
-        count = Math::GetRandom(0, 1) + 1;
-      } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        // 매 박자에 1개노트 나올수도 25%
-        if (Math::GetRandom(0, 4) == 0) {
-          count = 1;
-        }
-      }
-      break;
+  // 한 비트당 걸리는 시간
+  double timePerBeat = game.BeatInfo.GetBeatInterval();
 
-    case Difficulty::Normal:
-      if (sigIndex == 0) {
-        // 매 마디에 1~2개 노트 등장
-        count = Math::GetRandom(0, 1) + 1;
-      } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        // 매 박자에 나올수도 50%
-        if (Math::GetRandom(0, 1) == 0) {
-          // 1~2개 노트
-          count = Math::GetRandom(0, 1) + 1;
-        }
-      }
-      break;
+  // 판정선까지 도달하는데 걸리는 비트 수 계산
+  int beatsToJudgment =
+      static_cast<int>(timeToJudgment / timePerBeat) % maxBeat;
 
-    case Difficulty::Hard:
-      if (sigIndex == 0) {
-        // 매 마디에 1~2개 노트
-        count = Math::GetRandom(0, 1) + 1;
-      } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        // 매 박자에 나올수도 50%
-        if (Math::GetRandom(0, 1) == 0) {
-          // 1~2개 노트
-          count = Math::GetRandom(0, 1) + 1;
-        }
-      } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
-        // 8분음표 나올수도 50%
-        if (Math::GetRandom(0, game.TimeSig.Bottom) == 0) {
-          count = 1;
-        }
-      }
-      break;
-
-    case Difficulty::VeryHard:
-      if (sigIndex == 0) {
-        // 매 마디에 1~3개 노트
-        count = Math::GetRandom(0, 2) + 1;
-      } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
-        // 8분음표 나올수도 50%
-        if (Math::GetRandom(0, 3) != 0) {
-          // 1~2개 노트
-          count = Math::GetRandom(0, 1) + 1;
-        }
-      }
-      break;
-
-    case Difficulty::Expert:
-      if (sigIndex == 0) {
-        // 매 마디에 1~3개 노트
-        count = Math::GetRandom(0, 2) + 1;
-      } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        // 매 박자에 1~2개 노트
-        count = Math::GetRandom(0, 1) + 1;
-      } else if (sigIndex % (game.TimeSig.Bottom / 4) == 0) {
-        // 16분음표 나올수도 50%
-        if (Math::GetRandom(0, 1) == 0) {
-          count = 1;
-        }
-      }
-      break;
-
-    case Difficulty::Master:
-      if (sigIndex == 0) {
-        // 매 마디에 0~3개 노트
-        count = Math::GetRandom(0, 3);
-      } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        // 매 박자에 0~2개 노트
-        count = Math::GetRandom(0, 2);
-      } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
-        // 8분음표 0~2개 노트
-        count = Math::GetRandom(0, 2);
-      } else if (sigIndex % (game.TimeSig.Bottom / 4) == 0) {
-        // 16분음표 나올지도
-        if (Math::GetRandom(0, 1) == 0) {
-          if (Math::GetRandom(0, 5) == 0) {
-            // 일반적으론 1개 노트
-            count = 1;
-          } else {
-            // 특수한 경우 2~3개 노트
-            count = Math::GetRandom(0, 2) + 1;
-          }
-        }
-      }
-      break;
+  // 속도 보정
+  if (beatsToJudgment == 0) {
+    beatsToJudgment = maxBeat - maxBeat / game.NoteSpeed;
+  } else {
+    beatsToJudgment = maxBeat - (beatsToJudgment / game.NoteSpeed) % maxBeat;
   }
 
+  // 현재 비트에서 판정선까지 도달하는데 걸리는 비트 수를 뺀 인덱스 계산
+  int targetBeatIndex =
+      (maxBeat + game.currentBeatIndex - beatsToJudgment) % maxBeat;
+
+  // 마디 첫 비트 부터 시작
+  if (targetBeatIndex == 0) {
+    started = true;
+  }
+
+  if (!started) {
+    return;
+  }
+
+  int count = GenerateNodeCountPerBeat(targetBeatIndex);
   if (count <= 0) {
     return;
   }
 
-  std::set<int> lines(spawnLines);
-  spawnLines.clear();
-  for (int i = 0; i < count; i++) {
-    int line = Math::GetRandom(0, 3, lines);
-    if (spawnLines.find(line) != spawnLines.end())
-      continue;
-
-    GenNode(line);
-
-    spawnLines.insert(line);
-  }
+  GenerateNode(count);
 }
 
 void NodeController::OnMove(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
-
-  double tick = game.TimeSig.GetTick();
-  double frame = game.TimeSigFrame * game.NoteSpeed;
-  int tickIndex = static_cast<int>(std::floor(frame / tick));
-
-  if (game.TimeSigIndex == prevSigIndex && prevTickIndex == tickIndex)
-    return;
-
-  prevTickIndex = tickIndex;
 
   for (auto node : game.StageNodes) {
     if (node->IsActive() == false)
@@ -216,7 +118,7 @@ void NodeController::OnJudge(double deltaTime) {
       if (node->GetLine() != line)
         continue;
 
-      double duration = GetDuration(node);
+      double duration = node->GetTimeToJudgmentLine();
       if (!JudgeNode(duration))
         continue;
 
@@ -233,8 +135,8 @@ void NodeController::OnJudge(double deltaTime) {
     if (node->IsActive() == false || node->HasEffect())
       continue;
 
-    double duration = GetDuration(node);
-    if (duration > game.Judge_Bad) {
+    double duration = node->GetTimeToJudgmentLine();
+    if (duration > game.GetJudge(ScoreTypes::Bad)) {
       node->SetMiss();
       user.scores[ScoreTypes::Miss]++;
       user.comboCount = 0;
@@ -265,18 +167,142 @@ void NodeController::OnCleanup(double deltaTime) {
   }
 }
 
-void NodeController::GenNode(int line) {
+int NodeController::GenerateNodeCountPerBeat(int beatIndex) const {
   auto& game = DataManager::GetInstance().game;
 
-  if (nodePool.size() <= 0) {
-    nodePool.push_back(new Node());
+  int count = 0;
+  switch (game.Difficulty) {
+    case Difficulty::Beginner:
+      if (beatIndex == 0) {
+        // 1마디에 1~2개 노트
+        count = Math::GetRandom(0, 1) + 1;
+      }
+      break;
+
+    case Difficulty::Easy:
+      if (beatIndex == 0) {
+        // 매 마디에 1~2개 노트
+        count = Math::GetRandom(0, 1) + 1;
+      } else if (beatIndex % game.BeatInfo.Bottom == 0) {
+        // 매 박자에 1개노트 나올수도 25%
+        if (Math::GetRandom(0, 4) == 0) {
+          count = 1;
+        }
+      }
+      break;
+
+    case Difficulty::Normal:
+      if (beatIndex == 0) {
+        // 매 마디에 1~2개 노트 등장
+        count = Math::GetRandom(0, 1) + 1;
+      } else if (beatIndex % game.BeatInfo.Bottom == 0) {
+        // 매 박자에 나올수도 50%
+        if (Math::GetRandom(0, 1) == 0) {
+          // 1~2개 노트
+          count = Math::GetRandom(0, 1) + 1;
+        }
+      }
+      break;
+
+    case Difficulty::Hard:
+      if (beatIndex == 0) {
+        // 매 마디에 1~2개 노트
+        count = Math::GetRandom(0, 1) + 1;
+      } else if (beatIndex % game.BeatInfo.Bottom == 0) {
+        // 매 박자에 나올수도 50%
+        if (Math::GetRandom(0, 1) == 0) {
+          // 1~2개 노트
+          count = Math::GetRandom(0, 1) + 1;
+        }
+      } else if (beatIndex % (game.BeatInfo.Bottom / 2) == 0) {
+        // 8분음표 나올수도 50%
+        if (Math::GetRandom(0, game.BeatInfo.Bottom) == 0) {
+          count = 1;
+        }
+      }
+      break;
+
+    case Difficulty::VeryHard:
+      if (beatIndex == 0) {
+        // 매 마디에 1~3개 노트
+        count = Math::GetRandom(0, 2) + 1;
+      } else if (beatIndex % (game.BeatInfo.Bottom / 2) == 0) {
+        // 8분음표 나올수도 50%
+        if (Math::GetRandom(0, 3) != 0) {
+          // 1~2개 노트
+          count = Math::GetRandom(0, 1) + 1;
+        }
+      }
+      break;
+
+    case Difficulty::Expert:
+      if (beatIndex == 0) {
+        // 매 마디에 1~3개 노트
+        count = Math::GetRandom(0, 2) + 1;
+      } else if (beatIndex % game.BeatInfo.Bottom == 0) {
+        // 매 박자에 1~2개 노트
+        count = Math::GetRandom(0, 1) + 1;
+      } else if (beatIndex % (game.BeatInfo.Bottom / 4) == 0) {
+        // 16분음표 나올수도 50%
+        if (Math::GetRandom(0, 1) == 0) {
+          count = 1;
+        }
+      }
+      break;
+
+    case Difficulty::Master:
+      if (beatIndex == 0) {
+        // 매 마디에 0~3개 노트
+        count = Math::GetRandom(0, 3);
+      } else if (beatIndex % game.BeatInfo.Bottom == 0) {
+        // 매 박자에 0~2개 노트
+        count = Math::GetRandom(0, 2);
+      } else if (beatIndex % (game.BeatInfo.Bottom / 2) == 0) {
+        // 8분음표 0~2개 노트
+        count = Math::GetRandom(0, 2);
+      } else if (beatIndex % (game.BeatInfo.Bottom / 4) == 0) {
+        // 16분음표 나올지도
+        if (Math::GetRandom(0, 1) == 0) {
+          if (Math::GetRandom(0, 5) == 0) {
+            // 일반적으론 1개 노트
+            count = 1;
+          } else {
+            // 특수한 경우 2~3개 노트
+            count = Math::GetRandom(0, 2) + 1;
+          }
+        }
+      }
+      break;
   }
 
-  auto node = nodePool.front();
-  nodePool.pop_front();
+  game.DebugBeatIndex = beatIndex;
+  game.DebugNodeCount += count;
 
-  node->Init(line, startIndex);
-  game.StageNodes.push_back(node);
+  return count;
+}
+
+void NodeController::GenerateNode(int count) {
+  auto& game = DataManager::GetInstance().game;
+
+  std::set<int> prevLines(spawnLines);
+  spawnLines.clear();
+  for (int i = 0; i < count; i++) {
+    int line = Math::GetRandom(0, 3, prevLines);
+    if (spawnLines.find(line) != spawnLines.end())
+      continue;
+
+    if (nodePool.size() <= 0) {
+      nodePool.push_back(new Node());
+    }
+
+    auto node = nodePool.front();
+    nodePool.pop_front();
+
+    node->Init(line);
+    game.StageNodes.push_back(node);
+
+    spawnLines.insert(line);
+  }
 }
 
 bool NodeController::JudgeNode(double duration) const {
@@ -284,19 +310,19 @@ bool NodeController::JudgeNode(double duration) const {
   auto& user = DataManager::GetInstance().user;
 
   double judge = std::abs(duration);
-  if (judge < game.Judge_Perfect) {
+  if (judge < game.GetJudge(ScoreTypes::Perfect)) {
     user.scores[ScoreTypes::Perfect]++;
-  } else if (judge < game.Judge_Great) {
+  } else if (judge < game.GetJudge(ScoreTypes::Great)) {
     user.scores[ScoreTypes::Great]++;
-  } else if (judge < game.Judge_Good) {
+  } else if (judge < game.GetJudge(ScoreTypes::Good)) {
     user.scores[ScoreTypes::Good]++;
-  } else if (judge < game.Judge_Bad) {
+  } else if (judge < game.GetJudge(ScoreTypes::Bad)) {
     user.scores[ScoreTypes::Bad]++;
   } else {
     return false;
   }
 
-  if (judge >= game.Judge_Perfect) {
+  if (judge >= game.GetJudge(ScoreTypes::Perfect)) {
     if (duration < 0) {
       user.fastCount++;
     } else {
@@ -305,19 +331,4 @@ bool NodeController::JudgeNode(double duration) const {
   }
 
   return true;
-}
-
-double NodeController::GetDuration(Node* node) const {
-  auto& game = DataManager::GetInstance().game;
-
-  int index = node->GetIndex();
-
-  // 판정선. 0이면 판정선 위에 있음
-  int judgeLine = index - Config::GetPerfectJudge();
-
-  // 노트 하나 이동하는 시간
-  const double tick = game.TimeSig.GetTick() / game.NoteSpeed;
-
-  // 판정선 위에 있는 노트의 시간
-  return game.TimeSigFrame / game.NoteSpeed + judgeLine * tick - tick * 0.5;
 }

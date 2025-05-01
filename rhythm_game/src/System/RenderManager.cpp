@@ -13,6 +13,8 @@
 #include "../Renderer/ResultRenderer.h"
 #include "../Renderer/TitleRenderer.h"
 
+#include "../Controller/Node/Node.h"
+
 const int MAX_LINES = 4;
 
 struct RenderManager::PrivateData {
@@ -91,23 +93,25 @@ std::stringstream RenderManager::OnRender(IRenderer* renderer) const {
       }
     }
 
+    buffer << "   ";
+
     if (y == 1) {
       char fpsBuffer[32];
-      sprintf_s(fpsBuffer, sizeof(fpsBuffer), "   %.2f FPS",
+      sprintf_s(fpsBuffer, sizeof(fpsBuffer), "%.2f FPS",
                 data.system.CurrentFPS);
       buffer << fpsBuffer;
     }
 
     if (y == 2) {
-      buffer << "   " << data.system.UpdateFrame << " UpdateFrame";
+      buffer << data.system.UpdateFrame << " UpdateFrame";
     }
 
     if (y == 5) {
-      buffer << "   " << "BPM " << data.game.TimeSig.BPM;
+      buffer << "BPM " << data.game.BeatInfo.BPM << "     ";
     }
 
     if (y == 6) {
-      buffer << "   " << "Difficulty ";
+      buffer << "Difficulty ";
       switch (data.game.Difficulty) {
         case Difficulty::Beginner:
           buffer << "Beginner";
@@ -133,8 +137,82 @@ std::stringstream RenderManager::OnRender(IRenderer* renderer) const {
       }
     }
 
+    DebugPrint(buffer, y);
+
     buffer << std::endl;
   }
 
   return buffer;
+}
+
+const Node* GetFirstNode() {
+  auto& game = DataManager::GetInstance().game;
+  for (const auto& node : game.StageNodes) {
+    if (node->IsActive() == false || node->HasEffect())
+      continue;
+
+    return node;
+  }
+
+  return nullptr;
+}
+
+void RenderManager::DebugPrint(std::stringstream& buffer, int y) const {
+  auto& data = DataManager::GetInstance();
+
+  if (data.system.showDebug == false) {
+    return;
+  }
+
+  if (y == 8) {
+    const auto& node = GetFirstNode();
+    if (node != nullptr) {
+      buffer << "Line " << node->GetLine();
+    }
+  }
+
+  if (y == 9) {
+    const auto& node = GetFirstNode();
+    if (node != nullptr) {
+      buffer << "Index " << node->GetIndex() << " ("
+             << node->GetIndex() - Config::GetPerfectJudge() << ")   ";
+    }
+  }
+
+  if (y == 10) {
+    const auto& node = GetFirstNode();
+    if (node != nullptr) {
+      char durationBuffer[32];
+      sprintf_s(durationBuffer, sizeof(durationBuffer), "%.3f",
+                node->GetTimeToJudgmentLine());
+      buffer << "Duration " << durationBuffer << "     ";
+    }
+  }
+
+  if (y == 11) {
+    const auto& node = GetFirstNode();
+    if (node != nullptr) {
+      char elapsedBuffer[32];
+      sprintf_s(elapsedBuffer, sizeof(elapsedBuffer), "%.3f",
+                node->GetElapsed());
+      buffer << "Elapsed " << elapsedBuffer << "     ";
+    }
+  }
+
+  if (y == 13) {
+    char frameBuffer[32];
+    sprintf_s(frameBuffer, sizeof(frameBuffer), "%.3f",
+              data.game.currentBeatFrame);
+    buffer << "BeatFrame " << frameBuffer << " / "
+           << data.game.BeatInfo.GetBeatInterval() << "    ";
+  }
+
+  if (y == 14) {
+    buffer << "BeatIndex " << data.game.DebugBeatIndex << " / "
+           << data.game.BeatInfo.GetTotalBeats() << "    ";
+  }
+
+  if (y == 15) {
+    buffer << "NodeCount " << data.game.DebugNodeCount << "    ";
+  }
 }

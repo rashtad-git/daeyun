@@ -33,6 +33,7 @@ class ScreenBase {
   }
   void DrawString(int x, int y, const char* message, int length);
   void DrawChar(int x, int y, char c) { SetBoard(Point(x, y), c); }
+  void DrawDouble(int x, int y, double value, int precision);
 
  private:
   int GetIndex(const Point& p) const { return p.y * screen.size.width + p.x; }

@@ -6,4 +6,6 @@ struct SystemData {
   double TargetFPS = 60;
   double CurrentFPS;
   double UpdateFrame;
+
+  bool showDebug = true;
 };

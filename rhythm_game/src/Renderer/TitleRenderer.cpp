@@ -6,7 +6,7 @@
 
 #include "./Screens/GameScreen.h"
 #include "./Screens/MetronomeScreen.h"
-#include "./Screens/TitleScreen.h"
+#include "./Screens/OptionScreen.h"
 
 struct TitleRenderer::PrivateData {
   std::vector<ScreenBase*> screens;
@@ -15,7 +15,7 @@ struct TitleRenderer::PrivateData {
 TitleRenderer::TitleRenderer() {
   This = new PrivateData();
   This->screens.push_back(new MetronomeScreen());
-  This->screens.push_back(new TitleScreen());
+  This->screens.push_back(new OptionScreen());
   This->screens.push_back(new GameScreen());
 }
 

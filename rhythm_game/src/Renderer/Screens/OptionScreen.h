@@ -2,10 +2,10 @@
 
 #include "../ScreenBase.h"
 
-class TitleScreen : public ScreenBase {
+class OptionScreen : public ScreenBase {
  public:
-  TitleScreen();
-  virtual ~TitleScreen() override;
+  OptionScreen();
+  virtual ~OptionScreen() override;
 
   virtual void Init() override;
   virtual void PreRender() override;

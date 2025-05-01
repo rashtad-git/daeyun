@@ -12,8 +12,8 @@ class MetronomeScreen : public ScreenBase {
   virtual void PostRender() override;
 
  private:
-  Point GetSigIndex(int sig) const;
+  Point GetBeatGridPosition(int beatIndex) const;
 
  private:
-  int prevTimeSigIndex;
+  int prevBeatIndex;
 };
