@@ -12,6 +12,7 @@ class NodeController : public IController {
   NodeController();
   virtual ~NodeController() override;
 
+ protected:
   virtual void OnInit() override;
   virtual void OnUpdate(double deltaTime) override;
 
@@ -22,9 +23,8 @@ class NodeController : public IController {
   void OnCleanup(double deltaTime);
 
  private:
-  void InitJudge();
   void GenNode(int line);
-  bool JudgeNode(Node* node) const;
+  bool JudgeNode(double duration) const;
 
  private:
   double GetDuration(Node* node) const;
@@ -34,7 +34,7 @@ class NodeController : public IController {
   int prevTickIndex;
   bool movedFrame;
   int spawnCount;
-  std::set<int> prevLines;
+  std::set<int> spawnLines;
   std::list<Node*> nodePool;
   int startIndex;
 };

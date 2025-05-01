@@ -33,6 +33,10 @@ void ScreenBase::SetSize(const Size& size) {
 void ScreenBase::DrawNumber(int x, int y, int number, int space) {
   const char numbers[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
+  for (int i = 0; i < space; i++) {
+    DrawChar(x + i, y, ' ');
+  }
+
   if (number == 0) {
     DrawChar(x + space - 1, y, numbers[0]);
     return;

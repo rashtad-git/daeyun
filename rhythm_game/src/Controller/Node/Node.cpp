@@ -39,11 +39,11 @@ void Node::OnHit(double deltaTime) {
     graphic = '*';
   } else if (hitFrame <= 0.2) {
     graphic = 'o';
-  } else if (hitFrame <= 0.3) {
+  } else if (hitFrame <= 0.5) {
     graphic = 'O';
   } else {
     // hit이 종료되면 노드는 deactive가 되며 사라진다.
-    Clear();
+    isActive = false;
   }
 }
 
@@ -60,6 +60,6 @@ void Node::OnMiss(double deltaTime) {
   } else if (missFrame <= 0.3) {
     graphic = ' ';
   } else {
-    Clear();
+    isActive = false;
   }
 }

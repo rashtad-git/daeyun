@@ -10,4 +10,8 @@ class ScoreScreen : public ScreenBase {
   virtual void Init() override;
   virtual void PreRender() override;
   virtual void PostRender() override;
+
+ private:
+  int lastNodeCount;
+  int lastMiss;
 };

@@ -48,6 +48,9 @@ struct UserData {
   int fastCount;
   int slowCount;
 
+  int comboCount;
+  int maxComboCount;
+
   UserData() {
     input.insert({InputControl::Left, VK_LEFT});
     input.insert({InputControl::Right, VK_RIGHT});

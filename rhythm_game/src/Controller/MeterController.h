@@ -7,6 +7,7 @@ class MeterController : public IController {
   MeterController();
   virtual ~MeterController() override;
 
+ protected:
   virtual void OnInit() override;
   virtual void OnUpdate(double deltaTime) override;
 };

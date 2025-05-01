@@ -9,4 +9,6 @@ struct Config {
   static const int GAME_LINE_HEIGHT = 19;
   static int GetPerfectJudge() { return GAME_LINE_HEIGHT - 3; }
   static int GetJudgeEnd() { return GAME_LINE_HEIGHT + 2; }
+
+  static double GetIndicatorDuration() { return 10; }
 };

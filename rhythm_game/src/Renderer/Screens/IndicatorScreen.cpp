@@ -122,7 +122,7 @@ void IndicatorScreen::PostRender() {
   }
 
   auto& game = DataManager::GetInstance().game;
-  double limitTime = game.GameTime - 3;
+  double limitTime = game.GameTime - Config::GetIndicatorDuration();
   auto front = judgePoints.front();
   while (front.first < limitTime) {
     judgeCount[front.second]--;

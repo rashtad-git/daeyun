@@ -28,7 +28,7 @@ void StateManager::Init() {
 
   game.GameState = GameState::Game;
   game.GameTime = 0;
-  // game.IsPlaySound = true;
+  game.IsPlaySound = true;
   game.Difficulty = Difficulty::VeryHard;
   game.NoteSpeed = 2;
   game.TimeSig.BPM = 160;
@@ -47,7 +47,7 @@ void StateManager::Init() {
   game.Judge_Bad = 0.3 * mul;
 
   for (auto& controller : This->controllers) {
-    controller->OnInit();
+    controller->Init();
   }
 }
 
@@ -56,6 +56,6 @@ void StateManager::Update(double deltaTime) {
   game.GameTime += deltaTime;
 
   for (auto controller : This->controllers) {
-    controller->OnUpdate(deltaTime);
+    controller->Update(deltaTime);
   }
 }

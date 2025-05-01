@@ -28,8 +28,6 @@ void NodeController::OnInit() {
 
   int judgeLine = Config::GetPerfectJudge();
   startIndex = -1;  // 1 - judgeLine * game.NoteSpeed;
-
-  InitJudge();
 }
 
 void NodeController::OnUpdate(double deltaTime) {
@@ -53,91 +51,125 @@ void NodeController::OnSpawn(double deltaTime) {
 
   int sigIndex = game.TimeSigIndex;
 
-  int count = 1;
+  int count = 0;
   switch (game.Difficulty) {
-      // Beginner�� ù�ڸ� 1���� ��Ʈ ����
     case Difficulty::Beginner:
-      //if (sigIndex == 0)
-      if (sigIndex % game.TimeSig.Bottom == 0)
-        break;
-      return;
+      if (sigIndex == 0) {
+        // 1마디에 1~2개 노트
+        count = Math::GetRandom(0, 1) + 1;
+      }
+      break;
 
-      // easy�� ù�ڿ� �ִ� 2���� ��Ʈ�� �����ǰ� �ڸ��� ���� ��Ʈ�� ����
     case Difficulty::Easy:
       if (sigIndex == 0) {
+        // 매 마디에 1~2개 노트
         count = Math::GetRandom(0, 1) + 1;
-        break;
       } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        if (Math::GetRandom(0, game.TimeSig.Bottom) == 0)
-          break;
+        // 매 박자에 1개노트 나올수도 25%
+        if (Math::GetRandom(0, 4) == 0) {
+          count = 1;
+        }
       }
-      return;
-      // easy �� ������ �� ���� �󵵷� ��Ʈ ����, �ڿ��� 2���� ��Ʈ ����
-    case Difficulty::Normal:
-      count = Math::GetRandom(0, 1) + 1;
-      if (sigIndex == 0) {
-        break;
-      } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        if (Math::GetRandom(0, 1) == 0)
-          break;
-      }
-      return;
+      break;
 
-      // �� �ڿ� �ִ� 2���� ��Ʈ ����, 8����ǥ ����
+    case Difficulty::Normal:
+      if (sigIndex == 0) {
+        // 매 마디에 1~2개 노트 등장
+        count = Math::GetRandom(0, 1) + 1;
+      } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        // 매 박자에 나올수도 50%
+        if (Math::GetRandom(0, 1) == 0) {
+          // 1~2개 노트
+          count = Math::GetRandom(0, 1) + 1;
+        }
+      }
+      break;
+
     case Difficulty::Hard:
       if (sigIndex == 0) {
+        // 매 마디에 1~2개 노트
         count = Math::GetRandom(0, 1) + 1;
-        break;
       } else if (sigIndex % game.TimeSig.Bottom == 0) {
-        count = Math::GetRandom(0, 1) + 1;
-        if (Math::GetRandom(0, 1) == 0)
-          break;
+        // 매 박자에 나올수도 50%
+        if (Math::GetRandom(0, 1) == 0) {
+          // 1~2개 노트
+          count = Math::GetRandom(0, 1) + 1;
+        }
       } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
-        if (Math::GetRandom(0, game.TimeSig.Bottom) == 0)
-          break;
+        // 8분음표 나올수도 50%
+        if (Math::GetRandom(0, game.TimeSig.Bottom) == 0) {
+          count = 1;
+        }
       }
-      return;
+      break;
 
-      // ù�ڿ� �ִ� 3�� ��Ʈ ����,
     case Difficulty::VeryHard:
       if (sigIndex == 0) {
+        // 매 마디에 1~3개 노트
         count = Math::GetRandom(0, 2) + 1;
-        break;
       } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
-        count = Math::GetRandom(0, 1) + 1;
-        if (Math::GetRandom(0, 3) != 0)
-          break;
+        // 8분음표 나올수도 50%
+        if (Math::GetRandom(0, 3) != 0) {
+          // 1~2개 노트
+          count = Math::GetRandom(0, 1) + 1;
+        }
       }
-      return;
+      break;
 
-      // 16�� ��ǥ ����
     case Difficulty::Expert:
       if (sigIndex == 0) {
+        // 매 마디에 1~3개 노트
         count = Math::GetRandom(0, 2) + 1;
-        break;
       } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        // 매 박자에 1~2개 노트
         count = Math::GetRandom(0, 1) + 1;
-        break;
       } else if (sigIndex % (game.TimeSig.Bottom / 4) == 0) {
-        if (Math::GetRandom(0, 1) == 0)
-          break;
+        // 16분음표 나올수도 50%
+        if (Math::GetRandom(0, 1) == 0) {
+          count = 1;
+        }
       }
-      return;
+      break;
 
     case Difficulty::Master:
-      if (sigIndex % game.TimeSig.Bottom == 0) {
-        count = 2;
+      if (sigIndex == 0) {
+        // 매 마디에 0~3개 노트
+        count = Math::GetRandom(0, 3);
+      } else if (sigIndex % game.TimeSig.Bottom == 0) {
+        // 매 박자에 0~2개 노트
+        count = Math::GetRandom(0, 2);
+      } else if (sigIndex % (game.TimeSig.Bottom / 2) == 0) {
+        // 8분음표 0~2개 노트
+        count = Math::GetRandom(0, 2);
+      } else if (sigIndex % (game.TimeSig.Bottom / 4) == 0) {
+        // 16분음표 나올지도
+        if (Math::GetRandom(0, 1) == 0) {
+          if (Math::GetRandom(0, 5) == 0) {
+            // 일반적으론 1개 노트
+            count = 1;
+          } else {
+            // 특수한 경우 2~3개 노트
+            count = Math::GetRandom(0, 2) + 1;
+          }
+        }
       }
       break;
   }
 
-  std::set<int> lines(prevLines);
-  prevLines.clear();
+  if (count <= 0) {
+    return;
+  }
+
+  std::set<int> lines(spawnLines);
+  spawnLines.clear();
   for (int i = 0; i < count; i++) {
     int line = Math::GetRandom(0, 3, lines);
+    if (spawnLines.find(line) != spawnLines.end())
+      continue;
+
     GenNode(line);
 
-    prevLines.insert(line);
+    spawnLines.insert(line);
   }
 }
 
@@ -168,6 +200,7 @@ void NodeController::OnJudge(double deltaTime) {
   auto& game = DataManager::GetInstance().game;
   auto& user = DataManager::GetInstance().user;
 
+  // 입력 처리
   for (int line = 0; line < Config::BUTTON_COUNT; line++) {
     const auto& button = user.input.find(ActionButtons[line]);
     if (button == user.input.end())
@@ -176,30 +209,40 @@ void NodeController::OnJudge(double deltaTime) {
     if (button->second.tapped == false)
       continue;
 
-    for (auto node : game.StageNodes) {
-      if (node->IsActive() == false || node->HasEffect() ||
-          node->GetLine() != line)
+    for (auto& node : game.StageNodes) {
+      if (node->IsActive() == false || node->HasEffect())
         continue;
 
-      int index = node->GetIndex();
-      if (!JudgeNode(node))
+      if (node->GetLine() != line)
         continue;
 
+      double duration = GetDuration(node);
+      if (!JudgeNode(duration))
+        continue;
+
+      user.indicator.push_back(duration);
+      user.comboCount++;
+      user.maxComboCount = max(user.maxComboCount, user.comboCount);
+      node->SetHit();
       break;
     }
   }
 
-  for (Node* node : game.StageNodes) {
+  // miss 판정
+  for (auto& node : game.StageNodes) {
     if (node->IsActive() == false || node->HasEffect())
       continue;
 
-    if (game.Judge_Bad < GetDuration(node)) {
+    double duration = GetDuration(node);
+    if (duration > game.Judge_Bad) {
       node->SetMiss();
       user.scores[ScoreTypes::Miss]++;
+      user.comboCount = 0;
     } else if (node->GetIndex() > Config::GetJudgeEnd()) {
       node->Back();
       node->SetMiss();
       user.scores[ScoreTypes::Miss]++;
+      user.comboCount = 0;
     }
   }
 }
@@ -215,22 +258,11 @@ void NodeController::OnCleanup(double deltaTime) {
     }
   }
 
-  for (Node* node : deactivated) {
+  for (auto& node : deactivated) {
+    node->Clear();
     game.StageNodes.remove(node);
     nodePool.push_back(node);
   }
-}
-
-void NodeController::InitJudge() {
-  auto& game = DataManager::GetInstance().game;
-
-  // // Judge
-  // const double tick = game.TimeSig.GetTick();
-
-  // game.Judge_Perfect = tick / 4;
-  // game.Judge_Great = tick / 2;
-  // game.Judge_Good = tick;
-  // game.Judge_Bad = tick * 2;
 }
 
 void NodeController::GenNode(int line) {
@@ -247,11 +279,9 @@ void NodeController::GenNode(int line) {
   game.StageNodes.push_back(node);
 }
 
-bool NodeController::JudgeNode(Node* node) const {
+bool NodeController::JudgeNode(double duration) const {
   auto& game = DataManager::GetInstance().game;
   auto& user = DataManager::GetInstance().user;
-
-  double duration = GetDuration(node);
 
   double judge = std::abs(duration);
   if (judge < game.Judge_Perfect) {
@@ -274,8 +304,6 @@ bool NodeController::JudgeNode(Node* node) const {
     }
   }
 
-  user.indicator.push_back(duration);
-  node->SetHit();
   return true;
 }
 
