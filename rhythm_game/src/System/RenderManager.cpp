@@ -114,25 +114,25 @@ std::stringstream RenderManager::OnRender(IRenderer* renderer) const {
       buffer << "Difficulty ";
       switch (data.game.Difficulty) {
         case Difficulty::Beginner:
-          buffer << "Beginner";
+          buffer << "Beginner   ";
           break;
         case Difficulty::Easy:
-          buffer << "Easy";
+          buffer << "Easy       ";
           break;
         case Difficulty::Normal:
-          buffer << "Normal";
+          buffer << "Normal     ";
           break;
         case Difficulty::Hard:
-          buffer << "Hard";
+          buffer << "Hard       ";
           break;
         case Difficulty::VeryHard:
-          buffer << "Very Hard";
+          buffer << "Very Hard  ";
           break;
         case Difficulty::Expert:
-          buffer << "Expert";
+          buffer << "Expert     ";
           break;
         case Difficulty::Master:
-          buffer << "Master";
+          buffer << "Master     ";
           break;
       }
     }
@@ -163,7 +163,7 @@ void RenderManager::DebugPrint(std::stringstream& buffer, int y) const {
   auto& data = DataManager::GetInstance();
 
   if (data.system.showDebug == false) {
-    buffer << "                       ";
+    buffer << "                             ";
     return;
   }
 
