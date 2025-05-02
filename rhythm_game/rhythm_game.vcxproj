@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Renderer\Screens\JudgeScreen.cpp" />
     <ClCompile Include="src\Controller\SceneController.cpp" />
     <ClCompile Include="src\System\SoundManager.cpp" />
     <ClCompile Include="src\Controller\MeterController.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="src\Renderer\Screens\OptionScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Renderer\Screens\JudgeScreen.h" />
     <ClInclude Include="src\Controller\SceneController.h" />
     <ClInclude Include="src\System\SoundManager.h" />
     <ClInclude Include="src\Controller\MeterController.h" />

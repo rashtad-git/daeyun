@@ -60,7 +60,7 @@ void OptionScreen::PreRender() {
   DrawString(30, 7, data.system.showDebug ? "  On" : " Off", 5);
 
   // focus 표시
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 7; i++) {
     int y = 2 + i;
 
     if (data.user.optionFocus == i) {

@@ -5,6 +5,7 @@
 #include "../Models/Math.h"
 
 #include "./Screens/GameScreen.h"
+#include "./Screens/JudgeScreen.h"
 #include "./Screens/MetronomeScreen.h"
 #include "./Screens/OptionScreen.h"
 
@@ -17,6 +18,7 @@ TitleRenderer::TitleRenderer() {
   This->screens.push_back(new MetronomeScreen());
   This->screens.push_back(new OptionScreen());
   This->screens.push_back(new GameScreen());
+  This->screens.push_back(new JudgeScreen());
 }
 
 TitleRenderer::~TitleRenderer() {
