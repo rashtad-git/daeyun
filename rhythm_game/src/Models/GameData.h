@@ -58,7 +58,7 @@ struct GameData {
     StageNodeCount = 0;
 
     DebugBeatIndex = 0;
-    DebugNodeCount = 0;
+    DebugSpawnNodeCount = 0;
   }
 
   double GetJudge(ScoreTypes type) const {
@@ -78,5 +78,5 @@ struct GameData {
 
   // debug
   int DebugBeatIndex;
-  int DebugNodeCount;
+  int DebugSpawnNodeCount;
 };

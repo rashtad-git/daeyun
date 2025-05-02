@@ -137,7 +137,9 @@ std::stringstream RenderManager::OnRender(IRenderer* renderer) const {
       }
     }
 
-    DebugPrint(buffer, y);
+    if (y > 6) {
+      DebugPrint(buffer, y);
+    }
 
     buffer << std::endl;
   }
@@ -161,6 +163,7 @@ void RenderManager::DebugPrint(std::stringstream& buffer, int y) const {
   auto& data = DataManager::GetInstance();
 
   if (data.system.showDebug == false) {
+    buffer << "                       ";
     return;
   }
 
@@ -213,6 +216,6 @@ void RenderManager::DebugPrint(std::stringstream& buffer, int y) const {
   }
 
   if (y == 15) {
-    buffer << "NodeCount " << data.game.DebugNodeCount << "    ";
+    buffer << "SpawnCount " << data.game.DebugSpawnNodeCount << "    ";
   }
 }

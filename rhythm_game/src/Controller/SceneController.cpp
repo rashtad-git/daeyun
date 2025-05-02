@@ -37,7 +37,7 @@ void SceneController::OnTitle() {
 
   const ButtonState* input_down = data.user.GetInput(InputControl::Down);
   if (input_down != nullptr && input_down->tapped &&
-      data.user.optionFocus < 5) {
+      data.user.optionFocus < 6) {
     data.user.optionFocus++;
   }
 
@@ -130,8 +130,16 @@ void SceneController::OnTitle() {
     }
   }
 
-  // 시작 버튼
+  // 디버그 출력
   if (data.user.optionFocus == 5) {
+    if ((input_left != nullptr && input_left->tapped) ||
+        (input_right != nullptr && input_right->tapped)) {
+      data.system.showDebug = !data.system.showDebug;
+    }
+  }
+
+  // 시작 버튼
+  if (data.user.optionFocus == 6) {
     if (input_enter != nullptr && input_enter->tapped) {
       data.game.GameState = GameState::Game;
 

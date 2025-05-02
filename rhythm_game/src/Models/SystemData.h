@@ -7,5 +7,5 @@ struct SystemData {
   double CurrentFPS;
   double UpdateFrame;
 
-  bool showDebug = true;
+  bool showDebug = false;
 };

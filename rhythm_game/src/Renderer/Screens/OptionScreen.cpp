@@ -21,7 +21,7 @@ void OptionScreen::Init() {
   DrawString(2, 4, "|         Speed   [            1     ]    |");
   DrawString(2, 5, "|    JudgeScale   [          2.0     ]    |");
   DrawString(2, 6, "|     PlaySound   [           On     ]    |");
-  DrawString(2, 7, "|                                         |");
+  DrawString(2, 7, "|     ShowDebug   [          Off     ]    |");
   DrawString(2, 8, "|                 [      Start       ]    |");
   DrawString(2, 9, " ----------------------------------------- ");
 }
@@ -57,12 +57,11 @@ void OptionScreen::PreRender() {
   DrawNumber(30, 4, data.game.NoteSpeed, 4);
   DrawDouble(30, 5, data.game.JudgeScale, 1);
   DrawString(30, 6, data.game.IsPlaySound ? "  On" : " Off", 5);
+  DrawString(30, 7, data.system.showDebug ? "  On" : " Off", 5);
 
   // focus 표시
   for (int i = 0; i < 6; i++) {
     int y = 2 + i;
-    if (i == 5)
-      y = 3 + i;
 
     if (data.user.optionFocus == i) {
       DrawString(22, y, ">>");

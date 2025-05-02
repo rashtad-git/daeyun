@@ -48,6 +48,10 @@ StateManager::~StateManager() {
 }
 
 void StateManager::Init() {
+  auto& data = DataManager::GetInstance();
+  data.game.ClearDefault();
+  data.user.Clear();
+
   for (auto& controller : This->controllers) {
     controller->Init();
   }

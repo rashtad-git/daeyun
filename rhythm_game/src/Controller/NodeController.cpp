@@ -276,7 +276,7 @@ int NodeController::GenerateNodeCountPerBeat(int beatIndex) const {
   }
 
   game.DebugBeatIndex = beatIndex;
-  game.DebugNodeCount += count;
+  game.DebugSpawnNodeCount += count;
 
   return count;
 }
